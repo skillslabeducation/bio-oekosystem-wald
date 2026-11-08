@@ -186,6 +186,35 @@ test('Räuber-Beute: Spechte reagieren verzögert auf Käfer', () => {
   assert.ok(next.S > st.S, 'viele Käfer → mehr Spechte');
 });
 
+test('Simulator-Mission: mit Netz lösbar, ohne Netz nicht', () => {
+  [{ K: 60, S: 20 }, { K: 100, S: 20 }, { K: 35, S: 15 }, { K: 45, S: 28 }, { K: 80, S: 12 }].forEach((from) => {
+    ['netz', 'ohne'].forEach((mode) => {
+      const hist = [{ K: from.K * 1.8, S: from.S }];
+      let r;
+      for (let y = 0; y < 20; y++) { hist.push(L.simYear(hist[hist.length - 1], mode === 'netz')); r = L.simMission(hist, 0); if (r.status !== 'laeuft') break; }
+      assert.strictEqual(r.status, mode === 'netz' ? 'geschafft' : 'verpasst', mode + ' ab ' + JSON.stringify(from));
+    });
+  });
+});
+
+test('Försterin: Auftrag für jede Station, Geheimnisse aufsteigend', () => {
+  W.stations.forEach((s) => assert.ok(W.AUFTRAG[s.id] && W.AUFTRAG[s.id].length > 40, s.id));
+  const ab = W.GEHEIMNISSE.map((g) => g.ab);
+  assert.deepStrictEqual(ab.slice(), ab.slice().sort((a, b) => a - b));
+  W.GEHEIMNISSE.forEach((g) => assert.ok(W.art.icon(g.icon), g.icon));
+});
+
+test('Rucksack und Kapitel merken sich den Stand', () => {
+  W.state.load();
+  W.state.rucksackAdd('q-sw1'); W.state.rucksackAdd('q-sw1'); W.state.rucksackAdd('q-na2');
+  assert.strictEqual(W.state.data.rucksack.length, 2);
+  W.state.rucksackRemove('q-sw1');
+  assert.deepStrictEqual(Array.from(W.state.data.rucksack), ['q-na2']);
+  W.state.setKapitel('nahrung', 3); W.state.setKapitel('nahrung', 2);
+  assert.strictEqual(W.state.kapitel('nahrung'), 3);
+  W.state.reset();
+});
+
 test('Ränge wachsen mit den Stempeln', () => {
   assert.strictEqual(L.rankFor(0).name, 'Keimling');
   assert.strictEqual(L.rankFor(3).name, 'Setzling');

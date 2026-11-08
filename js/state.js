@@ -5,7 +5,7 @@
   var KEY = 'expedition-wald-v1';
 
   function fresh() {
-    return { v: 1, name: '', acorns: 0, ex: {}, explain: {}, seen: {}, quiz: { best: 0, runs: [] }, diplom: null };
+    return { v: 1, name: '', acorns: 0, ex: {}, explain: {}, seen: {}, quiz: { best: 0, runs: [] }, diplom: null, rucksack: [], kapitel: {}, missionen: {} };
   }
 
   var S = (W.state = {
@@ -68,6 +68,26 @@
 
     stamps: function () {
       return (W.stations || []).filter(function (st) { return S.stationProgress(st).stamp; }).length;
+    },
+
+    /* Fehler-Rucksack: falsch beantwortete Prüfungsfragen */
+    rucksackAdd: function (id) {
+      if (S.data.rucksack.indexOf(id) < 0) { S.data.rucksack.push(id); S.save(); }
+    },
+    rucksackRemove: function (id) {
+      var i = S.data.rucksack.indexOf(id);
+      if (i >= 0) { S.data.rucksack.splice(i, 1); S.save(); }
+    },
+
+    /* Entdecken: wie viele Kapitel einer Station schon aufgedeckt sind */
+    kapitel: function (stationId) { return S.data.kapitel[stationId] || 1; },
+    setKapitel: function (stationId, n) {
+      if (n > S.kapitel(stationId)) { S.data.kapitel[stationId] = n; W.store.set(KEY, S.data); }
+    },
+
+    /* Wald-Geheimnisse, freigeschaltet durch Eicheln */
+    geheimnisse: function () {
+      return (W.GEHEIMNISSE || []).filter(function (g) { return S.data.acorns >= g.ab; }).length;
     },
 
     recordQuiz: function (run) {

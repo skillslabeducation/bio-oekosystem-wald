@@ -86,10 +86,17 @@ main { padding-bottom: 64px; }
 .abschnitt { margin-top: 12px; }
 
 /* ---------- Karte ---------- */
-.karte-intro { max-width: 1180px; margin: 0 auto; padding: 20px 16px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 8px 28px; align-items: center; }
-.karte-intro__titel { margin: 0; font-size: 2.4rem; }
+.karte-intro { max-width: 1180px; margin: 0 auto; padding: 18px 16px 14px; display: grid; grid-template-columns: 1fr auto; gap: 12px 28px; align-items: center; }
+.karte-intro__links { display: grid; grid-template-columns: auto 1fr; gap: 6px 24px; align-items: center; }
+.karte-intro__titel { margin: 0; font-size: 2.4rem; grid-row: span 2; }
 .karte-intro__text { margin: 0; max-width: 56ch; color: var(--tinte-2); }
 .karte-intro__weiter { margin: 0; }
+.mein-baum { display: flex; align-items: center; gap: 10px; background: var(--papier); border: 1px solid var(--linie); border-radius: var(--r-m); padding: 6px 16px 6px 6px; text-decoration: none; color: var(--tinte); box-shadow: 0 2px 0 var(--linie); }
+.mein-baum .baumstufe { width: 76px; height: 76px; background: #eef3dc; border-radius: 12px; }
+.mein-baum__text { display: flex; flex-direction: column; line-height: 1.25; }
+.mein-baum__text small { color: var(--tinte-2); font-weight: 700; font-size: .8rem; }
+.mein-baum__text b { font-family: var(--serif); font-size: 1.25rem; color: var(--moos); }
+.mein-baum__text span { font-size: .85rem; color: var(--tinte-2); }
 .karte { position: relative; max-width: 1180px; margin: 0 auto; aspect-ratio: 1000 / 640; border-radius: var(--r-l); overflow: hidden; box-shadow: var(--schatten); }
 .karte-svg { display: block; width: 100%; height: 100%; }
 
@@ -580,6 +587,50 @@ main { padding-bottom: 64px; }
 .toast--weg { opacity: 0; transform: translateY(-12px); }
 @keyframes runter { from { transform: translateY(-14px); opacity: 0; } }
 
+/* ---------- Schleife 2: Försterin, Kapitel, Mission, Rucksack, Geheimnisse ---------- */
+.blase { display: flex; align-items: flex-end; gap: 12px; margin: -4px 0 18px; }
+.blase__fig { width: 86px; flex: none; background: linear-gradient(180deg, #dcefee, #eef5df); border-radius: 50% 50% 18px 18px; overflow: hidden; }
+.blase__fig svg { display: block; width: 100%; height: auto; }
+.blase__text { position: relative; margin: 0 0 10px; background: #fff; border: 2px solid var(--linie); border-radius: 18px; padding: 12px 16px; font-weight: 600; color: var(--tinte); max-width: 60ch; box-shadow: 0 2px 0 var(--linie); }
+.blase__text::before { content: ''; position: absolute; left: -11px; bottom: 14px; width: 18px; height: 18px; background: #fff; border-left: 2px solid var(--linie); border-bottom: 2px solid var(--linie); transform: rotate(45deg); }
+.blase--klein { margin: 0 0 14px; }
+.blase--klein .blase__fig { width: 64px; }
+.blase--klein .blase__text { font-size: .95rem; padding: 8px 14px; }
+
+.kapitel-leiste { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0 0 20px; counter-reset: kap; }
+.kapitel-leiste__punkt { counter-increment: kap; }
+.kapitel-leiste__punkt > * { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 12px 4px 6px; border-radius: 999px; font-size: .85rem; font-weight: 700; text-decoration: none; background: #eef2e4; color: #8a967f; }
+.kapitel-leiste__punkt > *::before { content: counter(kap); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; font-size: .75rem; }
+.kapitel-leiste__punkt--offen > * { background: var(--farn-hell); color: var(--moos); }
+.kapitel-leiste__punkt--jetzt > * { background: var(--moos); color: #fff; }
+.kapitel-leiste__punkt--jetzt > *::before { background: var(--sonne); color: var(--wald); }
+.kapitel { scroll-margin-top: 90px; animation: aufblenden .4s ease both; }
+.weiter__info { flex-basis: 100%; text-align: center; margin: 0; color: var(--tinte-2); font-size: .85rem; font-weight: 700; }
+
+.mission { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 14px; }
+.mission__fig { width: 72px; flex: none; background: linear-gradient(180deg, #dcefee, #eef5df); border-radius: 50% 50% 14px 14px; overflow: hidden; }
+.mission__fig svg { display: block; width: 100%; height: auto; }
+.mission__blase { flex: 1; background: var(--sonne-hell); border: 2px solid #ecd086; border-radius: 16px; padding: 10px 14px; }
+.mission__titel { font-family: var(--serif); font-weight: 800; color: var(--rinde); margin: 0 0 2px; }
+.mission__text { margin: 0; font-size: .95rem; }
+
+.rucksack { display: flex; gap: 16px; align-items: flex-start; background: var(--sonne-hell); border: 2px solid #ecd086; border-radius: var(--r-m); padding: 16px 18px; margin-bottom: 24px; }
+.rucksack__ico { width: 56px; height: 56px; flex: none; }
+.rucksack h2 { margin-bottom: .2em; font-size: 1.3rem; }
+.spur--serie li.spur--gut { box-shadow: 0 0 0 2px var(--sonne); }
+.kachel--rucksack { background: var(--sonne-hell); border-color: #efd88f; box-shadow: 0 2px 0 #efd88f; }
+.kachel--geheim { background: #f4efe6; }
+.toast--geheim { background: var(--moos); color: #fff; }
+
+.geheimnisse { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.geheimnis { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1px solid var(--linie); border-radius: var(--r-m); padding: 14px; }
+.geheimnis__ico { width: 48px; height: 48px; flex: none; }
+.geheimnis b { font-family: var(--serif); color: var(--moos); font-size: 1.1rem; }
+.geheimnis p { margin: 4px 0 0; font-size: .92rem; }
+.geheimnis--zu { background: #f2f2ec; border-style: dashed; }
+.geheimnis--zu b { color: #8a967f; }
+.geheimnis--zu .geheimnis__ico { filter: grayscale(1); opacity: .5; }
+
 /* Kleinere Bausteine aus Schleife 1 */
 .knopf--klein { min-height: 40px; padding: 6px 14px; font-size: .9rem; }
 .stempel-hinweis { display: flex; align-items: center; gap: 14px; background: var(--farn-hell); border-radius: var(--r-m); padding: 12px 16px; margin-bottom: 20px; }
@@ -603,7 +654,9 @@ main { padding-bottom: 64px; }
 
 /* ---------- Tablet hochkant & kleiner ---------- */
 @media (max-width: 960px) {
-  .karte-intro { grid-template-columns: 1fr; gap: 6px; }
+  .karte-intro { grid-template-columns: 1fr auto; gap: 10px 16px; }
+  .karte-intro__links { grid-template-columns: 1fr; }
+  .karte-intro__titel { grid-row: auto; }
   .karte-intro__titel { font-size: 2rem; }
   .karte { border-radius: 0; }
   .schichten__wrap { grid-template-columns: 1fr; }
@@ -633,6 +686,8 @@ main { padding-bottom: 64px; }
 }
 @media (max-width: 600px) {
   .schild { display: none; }
+  .karte-intro { grid-template-columns: 1fr; }
+  .blase__fig { width: 64px; }
   .kette__pfeil, .reihe__pfeil { width: 100%; flex-direction: row; gap: 6px; }
   .kette__pfeil::before, .reihe__pfeil::before { content: '↓'; }
   .kreis__knoten { min-width: 0; font-size: .75rem; padding: 4px 6px; }

@@ -239,6 +239,51 @@
     return '<svg class="karte-svg" viewBox="0 0 1000 640" role="img" aria-label="Querschnitt durch einen Wald mit Wurzel-, Moos-, Kraut-, Strauch- und Baumschicht">' + s + '</svg>';
   };
 
+  /* ---------- Försterin Lind (Brustbild) ---------- */
+  A.foersterin = function (stimmung) {
+    var mund = stimmung === 'froh'
+      ? '<path d="M52 77Q60 86 68 77" stroke="#7a3b2e" stroke-width="2.6" fill="#c9564a" stroke-linecap="round"/>'
+      : stimmung === 'hm'
+        ? '<path d="M53 80Q60 77 67 80" stroke="#7a3b2e" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+        : '<path d="M53 77Q60 83 67 77" stroke="#7a3b2e" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+    return '<svg class="foersterin" viewBox="0 0 120 130" role="img" aria-label="Försterin Lind">' +
+      '<path d="M14 130C16 104 34 94 60 94C86 94 104 104 106 130Z" fill="#4c6b3a"/>' +
+      '<path d="M48 96L60 112L72 96Z" fill="#e9e2c8"/><path d="M60 112L56 130M60 112L64 130" stroke="#3a5229" stroke-width="2"/>' +
+      '<rect x="24" y="108" width="16" height="10" rx="3" fill="#a07853"/><rect x="80" y="108" width="16" height="10" rx="3" fill="#a07853"/>' +
+      '<path d="M30 70C24 52 30 40 44 38L76 38C90 40 96 52 90 70C88 84 82 92 60 92C38 92 32 84 30 70Z" fill="#8a5a36"/>' +
+      '<ellipse cx="60" cy="66" rx="24" ry="27" fill="#f1c9a5"/>' +
+      '<circle cx="36" cy="68" r="5" fill="#eab995"/><circle cx="84" cy="68" r="5" fill="#eab995"/>' +
+      '<path d="M36 52C40 44 50 40 60 40C70 40 80 44 84 52C76 48 66 47 60 50C54 47 44 48 36 52Z" fill="#7a4e2e"/>' +
+      '<circle cx="51" cy="64" r="3" fill="#2a2018"/><circle cx="69" cy="64" r="3" fill="#2a2018"/>' +
+      '<circle cx="52" cy="63" r="1" fill="#fff"/><circle cx="70" cy="63" r="1" fill="#fff"/>' +
+      '<path d="M46 57Q51 54 55 57M65 57Q69 54 74 57" stroke="#6a4226" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="45" cy="73" r="4" fill="#ef9f8f" opacity=".5"/><circle cx="75" cy="73" r="4" fill="#ef9f8f" opacity=".5"/>' + mund +
+      '<path d="M22 40C22 32 40 30 60 30C80 30 98 32 98 40C98 44 82 44 60 44C38 44 22 44 22 40Z" fill="#2f5a3a"/>' +
+      '<path d="M36 34C36 18 46 10 60 10C74 10 84 18 84 34Z" fill="#3b6e47"/>' +
+      '<path d="M36 33L84 33" stroke="#a07853" stroke-width="4"/>' +
+      '<path d="M78 30C86 18 94 14 100 12C96 20 90 28 80 33Z" fill="#6f9a3c"/>' +
+      '</svg>';
+  };
+
+  /* ---------- Dein Baum: vier Wachstumsstufen ---------- */
+  A.baumStufe = function (stufe) {
+    var boden = '<path d="M6 112Q60 100 114 112L114 120L6 120Z" fill="#7d9e3a"/><path d="M6 116L114 116L114 120L6 120Z" fill="#6f4f34"/>';
+    var s = [
+      // Keimling
+      '<path d="M60 112L60 92" stroke="#6a8f3a" stroke-width="3" stroke-linecap="round"/><path d="M60 96C50 92 46 84 48 80C56 82 60 88 60 96Z" fill="#7fb04a"/><path d="M60 94C70 90 74 82 72 78C64 80 60 86 60 94Z" fill="#8cbc52"/>',
+      // Setzling
+      '<path d="M60 112L60 66" stroke="#7a5534" stroke-width="4" stroke-linecap="round"/><path d="M60 86L48 76M60 78L72 70" stroke="#7a5534" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<ellipse cx="46" cy="74" rx="9" ry="6" fill="#7fb04a" transform="rotate(-30 46 74)"/><ellipse cx="74" cy="68" rx="9" ry="6" fill="#8cbc52" transform="rotate(25 74 68)"/><ellipse cx="60" cy="62" rx="8" ry="10" fill="#7fb04a"/>',
+      // Jungbaum
+      '<path d="M57 112L58 56L62 56L63 112Z" fill="#7a5534"/><circle cx="60" cy="50" r="22" fill="#5a9a4c"/><circle cx="44" cy="60" r="14" fill="#4d8a44"/><circle cx="76" cy="60" r="14" fill="#4d8a44"/>',
+      // Waldriese
+      '<path d="M54 112L56 50L64 50L66 112Z" fill="#6e5038"/><path d="M58 80L42 66M62 74L80 60" stroke="#6e5038" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="60" cy="34" r="28" fill="#3d7a3b"/><circle cx="36" cy="50" r="20" fill="#4a8a44"/><circle cx="84" cy="50" r="20" fill="#4a8a44"/><circle cx="60" cy="22" r="18" fill="#579b4b"/>' +
+      '<circle cx="48" cy="30" r="3" fill="#c58a3e"/><circle cx="74" cy="44" r="3" fill="#c58a3e"/><circle cx="40" cy="54" r="3" fill="#c58a3e"/>'
+    ][Math.max(0, Math.min(3, stufe))];
+    return '<svg class="baumstufe" viewBox="0 0 120 120" aria-hidden="true">' + boden + s + '</svg>';
+  };
+
   /* ---------- Symbole (48×48, flach) ---------- */
   var I = {
     eichel: '<path d="M14 20C14 33 19 42 24 44C29 42 34 33 34 20Z" fill="#c58a3e"/><path d="M10 20C10 12 16 8 24 8C32 8 38 12 38 20Z" fill="#7a5230"/><path d="M14 14L34 14M12 18L36 18" stroke="#5f3e22" stroke-width="1.4"/><path d="M24 8L25 3" stroke="#5f3e22" stroke-width="3" stroke-linecap="round"/>',
@@ -263,6 +308,7 @@
     konkurrenz: '<g transform="translate(13 22) scale(.65)"><path d="M-6 18L-12 30L-6 28L-2 20Z" fill="#1d1d1b"/><ellipse cx="0" cy="8" rx="8" ry="14" fill="#1d1d1b"/><circle cx="3" cy="-9" r="7.5" fill="#1d1d1b"/><path d="M-4 -11L0 -12L-2 -8Z" fill="#c8372d"/><path d="M9 -10L20 -9L9 -7Z" fill="#4a4a48"/></g><g transform="translate(35 22) scale(-.65 .65)"><path d="M-6 18L-12 30L-6 28L-2 20Z" fill="#4f6e2b"/><ellipse cx="0" cy="8" rx="8" ry="14" fill="#6e9a3a"/><circle cx="3" cy="-9" r="7.5" fill="#6e9a3a"/><path d="M-4 -15C0 -18 6 -17 8 -13Z" fill="#c8372d"/><path d="M9 -10L22 -9L9 -7Z" fill="#3b3b38"/></g>',
     nische: '<path d="M8 14L20 14C20 8 28 8 28 14L40 14L40 26C46 26 46 34 40 34L40 44L8 44L8 34C14 34 14 26 8 26Z" fill="#6f9a3c"/><path d="M16 30L22 36L32 24" stroke="#fbfbf2" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     lupe: '<circle cx="20" cy="20" r="13" fill="#e8f2d8" stroke="#6a4a33" stroke-width="3.4"/><path d="M29 29L42 42" stroke="#6a4a33" stroke-width="5" stroke-linecap="round"/><path d="M20 30C12 27 12 17 20 10C28 17 28 27 20 30Z" fill="#6f9a3c"/>',
+    rucksack: '<path d="M18 16C18 9 30 9 30 16" stroke="#6a4a33" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 22C12 15 36 15 36 22L37 41C37 44 35 45 32 45L16 45C13 45 11 44 11 41Z" fill="#a0683a"/><path d="M12 21C18 27 30 27 36 21L36 29C30 33 18 33 12 29Z" fill="#7d5030"/><rect x="17" y="34" width="14" height="8" rx="2.5" fill="#c58a3e"/><circle cx="24" cy="29" r="2.2" fill="#f2b632"/>',
     diplom: '<path d="M8 10L40 10L40 38L8 38Z" fill="#fbf6e4" stroke="#a8743f" stroke-width="2"/><path d="M14 18L34 18M14 24L30 24M14 30L26 30" stroke="#a8743f" stroke-width="2" stroke-linecap="round"/><circle cx="34" cy="34" r="7" fill="#c8372d"/><path d="M30 40L28 47L34 44L40 47L38 40" fill="#c8372d"/>',
     feldbuch: '<path d="M8 6L36 6C38 6 40 8 40 10L40 42L12 42C10 42 8 40 8 38Z" fill="#5d7f3a"/><path d="M12 6L12 42" stroke="#3d5a24" stroke-width="2"/><path d="M18 14L34 14M18 20L32 20" stroke="#e7efd2" stroke-width="2" stroke-linecap="round"/><path d="M40 10L44 10L44 46L14 46L14 42" fill="none" stroke="#3d5a24" stroke-width="2"/>'
   };

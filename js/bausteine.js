@@ -188,9 +188,43 @@
   B.simulator = function () {
     var L = W.logic, P = L.SIM;
     var Kstar = P.m / P.ba, Sstar = P.r / P.a;
-    var hist, netz = false;
-    function reset() { hist = [{ K: P.K0, S: P.S0 }]; }
+    var hist, netz = false, missionStart = null;
+    function reset() { hist = [{ K: P.K0, S: P.S0 }]; missionStart = null; }
     reset();
+
+    /* Mission der Försterin */
+    var missionText = h('p', { class: 'mission__text', 'aria-live': 'polite' });
+    var missionFig = h('div', { class: 'mission__fig' });
+    var mission = h('div', { class: 'mission' }, missionFig, h('div', { class: 'mission__blase' }, h('p', { class: 'mission__titel' }, 'Mission der Försterin'), missionText));
+    function missionShow(stimmung, html) {
+      missionFig.innerHTML = A.foersterin(stimmung);
+      missionText.innerHTML = html;
+    }
+    function missionIntro() {
+      var done = W.state.data.missionen && W.state.data.missionen.sim;
+      missionShow(done ? 'froh' : '', (done ? '<b>Mission schon geschafft!</b> Du kannst sie trotzdem nochmal spielen. ' : '') +
+        '1. Tippe auf <b>Warmer Sommer</b>: Die Käfer vermehren sich massenhaft. 2. Bring den Wald in höchstens ' + L.MISSION.jahre +
+        ' Jahren zurück ins Gleichgewicht: drei Jahre hintereinander nahe am Mittelwert. Tipp: Ein Schalter unten hilft.');
+    }
+    function missionCheck() {
+      if (missionStart == null) return;
+      var r = L.simMission(hist, missionStart);
+      if (r.status === 'geschafft') {
+        missionStart = null;
+        var first = !(W.state.data.missionen && W.state.data.missionen.sim);
+        W.state.data.missionen = Object.assign({}, W.state.data.missionen, { sim: true });
+        if (first) { W.state.addAcorns(15); W.toast('+15 Eicheln: Mission geschafft!', 'eichel'); } else W.state.save();
+        missionShow('froh', '<b>Mission geschafft nach ' + r.jahre + ' Jahren!</b> ' + (netz
+          ? 'Das Netz aus vielen Beziehungen hat die Käferplage gebremst. Genau das meint der Merksatz: Je mehr Wechselbeziehungen, desto stabiler das Gleichgewicht.'
+          : 'Der Wald hat sich wieder eingependelt.'));
+      } else if (r.status === 'verpasst') {
+        missionStart = null;
+        missionShow('hm', '<b>Die ' + L.MISSION.jahre + ' Jahre sind um.</b> Ohne Hilfe schwanken Käfer und Spechte zu stark. Versuch es nochmal: Tippe auf <b>Neu starten</b> und dann auf <b>Warmer Sommer</b>. Welcher Schalter könnte helfen?');
+      } else {
+        missionShow('', '<b>Mission läuft: Jahr ' + r.jahre + ' von ' + L.MISSION.jahre + '.</b> ' + (netz ? 'Das Netz ist an. Spul weiter und beobachte die Kurven.' : 'Spul weiter. Schwanken die Kurven noch stark?'));
+      }
+    }
+    missionIntro();
 
     var story = h('p', { class: 'sim__story', 'aria-live': 'polite' }, 'Jahr 0: Im Wald leben viele Borkenkäfer und einige Buntspechte.');
     var chartK = h('div', { class: 'sim__chart' });
@@ -274,6 +308,7 @@
       for (var i = 0; i < nYears; i++) {
         var prev = hist[hist.length - 1];
         hist.push(L.simYear(prev, netz));
+        missionCheck();
       }
       var a = hist[hist.length - 2], b = hist[hist.length - 1];
       if (nYears === 1) {
@@ -301,7 +336,11 @@
     var b10 = h('button', { class: 'knopf', type: 'button' }, '10 Jahre');
     b10.addEventListener('click', function () { year(10); });
     var e1 = h('button', { class: 'knopf knopf--ereignis', type: 'button' }, 'Warmer Sommer: viele Käfer');
-    e1.addEventListener('click', function () { event(function (s) { return { K: s.K * 1.8, S: s.S }; }, 'Ein warmer, trockener Sommer: Die Borkenkäfer vermehren sich explosionsartig. Was machen die Spechte? Spul vor.'); });
+    e1.addEventListener('click', function () {
+      event(function (s) { return { K: s.K * 1.8, S: s.S }; }, 'Ein warmer, trockener Sommer: Die Borkenkäfer vermehren sich explosionsartig. Was machen die Spechte? Spul vor.');
+      missionStart = hist.length - 1;
+      missionCheck();
+    });
     var e2 = h('button', { class: 'knopf knopf--ereignis', type: 'button' }, 'Krankheit bei Spechten');
     e2.addEventListener('click', function () { event(function (s) { return { K: s.K, S: s.S * 0.5 }; }, 'Eine Krankheit: Die Hälfte der Spechte stirbt. Was passiert jetzt mit den Käfern? Spul vor.'); });
     var e3 = h('button', { class: 'knopf knopf--ereignis', type: 'button' }, 'Kalter, nasser Sommer');
@@ -315,10 +354,11 @@
     });
     var netzLab = h('label', { class: 'schalter' }, netzBox, h('span', { class: 'schalter__bahn', 'aria-hidden': 'true' }), h('span', null, 'Netz aus vielen Beziehungen'));
     var neu = h('button', { class: 'knopf knopf--leise', type: 'button' }, 'Neu starten');
-    neu.addEventListener('click', function () { reset(); story.textContent = 'Jahr 0: Im Wald leben viele Borkenkäfer und einige Buntspechte.'; draw(); });
+    neu.addEventListener('click', function () { reset(); missionIntro(); story.textContent = 'Jahr 0: Im Wald leben viele Borkenkäfer und einige Buntspechte.'; draw(); });
 
     draw();
     return h('div', { class: 'baustein sim' },
+      mission,
       h('div', { class: 'sim__oben' }, h('div', { class: 'sim__charts' }, chartK, chartS, tip), waage),
       story,
       h('div', { class: 'sim__steuer' }, b1, b10, neu),

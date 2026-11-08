@@ -29,14 +29,22 @@
     var stamps = W.state.stamps();
     var next = W.stations.filter(function (s) { return !W.state.stationProgress(s).stamp; })[0];
 
+    var rankIdx = W.logic.RANKS.indexOf(W.logic.rankFor(stamps));
+    var nextRank = W.logic.RANKS[rankIdx + 1];
+    var baum = h('a', { class: 'mein-baum', href: '#/feldbuch', 'aria-label': 'Dein Baum: ' + W.logic.rankFor(stamps).name },
+      svg(A.baumStufe(rankIdx)),
+      h('span', { class: 'mein-baum__text' }, h('small', null, 'Dein Baum'), h('b', null, W.logic.rankFor(stamps).name),
+        h('span', null, nextRank ? 'Noch ' + (nextRank.min - stamps) + ' Stempel bis ' + nextRank.name : 'Ganz groß geworden!')));
     var intro = h('div', { class: 'karte-intro' },
-      h('h1', { class: 'karte-intro__titel' }, d.name ? 'Hallo, ' + d.name + '!' : 'Willkommen im Wald!'),
-      h('p', { class: 'karte-intro__text' }, stamps
-        ? 'Du hast ' + stamps + ' von ' + W.stations.length + ' Stempeln. ' + (next ? 'Die nächste Station wartet schon.' : 'Alle Stationen geschafft. Jetzt ab auf den Hochsitz zur Försterprüfung!')
-        : 'Sechs Stationen warten im Wald. Sammle an jeder einen Stempel und hol dir in der Försterprüfung am Hochsitz das Walddiplom.'),
-      next
-        ? h('p', { class: 'karte-intro__weiter' }, h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { go('#/station/' + next.id); } }, stamps ? 'Weiter: ' + next.short : 'Los geht’s: ' + next.short))
-        : h('p', { class: 'karte-intro__weiter' }, h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { go('#/pruefung'); } }, 'Zur Försterprüfung')));
+      h('div', { class: 'karte-intro__links' },
+        h('h1', { class: 'karte-intro__titel' }, d.name ? 'Hallo, ' + d.name + '!' : 'Willkommen im Wald!'),
+        h('p', { class: 'karte-intro__text' }, stamps
+          ? 'Du hast ' + stamps + ' von ' + W.stations.length + ' Stempeln. ' + (next ? 'Die nächste Station wartet schon.' : 'Alle Stationen geschafft. Jetzt ab auf den Hochsitz zur Försterprüfung!')
+          : 'Sechs Stationen warten im Wald. Sammle an jeder einen Stempel und hol dir in der Försterprüfung am Hochsitz das Walddiplom.'),
+        next
+          ? h('p', { class: 'karte-intro__weiter' }, h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { go('#/station/' + next.id); } }, stamps ? 'Weiter: ' + next.short : 'Los geht’s: ' + next.short))
+          : h('p', { class: 'karte-intro__weiter' }, h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { go('#/pruefung'); } }, 'Zur Försterprüfung'))),
+      baum);
 
     var map = h('div', { class: 'karte' });
     var art = svg(A.forest());
@@ -80,8 +88,12 @@
     var extra = h('div', { class: 'karte-extra' },
       h('a', { class: 'kachel kachel--pruefung', href: '#/pruefung' }, svg(A.icon('diplom', 'kachel__ico')),
         h('span', null, h('b', null, 'Försterprüfung'), h('span', null, d.quiz.best ? 'Bestes Ergebnis: ' + Math.round(d.quiz.best * 100) + ' %' : '15 Fragen aus allen Stationen. Ab 80 % gibt es das Walddiplom.'))),
+      d.rucksack.length ? h('a', { class: 'kachel kachel--rucksack', href: '#/pruefung' }, svg(A.icon('rucksack', 'kachel__ico')),
+        h('span', null, h('b', null, 'Fehler-Rucksack'), h('span', null, d.rucksack.length + (d.rucksack.length === 1 ? ' Frage wartet' : ' Fragen warten') + ' darauf, dass du sie jetzt richtig beantwortest.'))) : null,
       h('a', { class: 'kachel kachel--feldbuch', href: '#/feldbuch' }, svg(A.icon('feldbuch', 'kachel__ico')),
-        h('span', null, h('b', null, 'Feldbuch'), h('span', null, 'Alle Merksätze auf einen Blick, deine Stempel und der Lernplan.'))));
+        h('span', null, h('b', null, 'Feldbuch'), h('span', null, 'Alle Merksätze auf einen Blick, deine Stempel und der Lernplan.'))),
+      h('a', { class: 'kachel kachel--geheim', href: '#/feldbuch/geheimnisse' }, svg(A.icon('eichel', 'kachel__ico')),
+        h('span', null, h('b', null, 'Wald-Geheimnisse'), h('span', null, W.state.geheimnisse() + ' von ' + W.GEHEIMNISSE.length + ' freigeschaltet. Mit jeder Eichel kommst du dem nächsten näher.'))));
 
     root.appendChild(intro);
     root.appendChild(map);
@@ -141,8 +153,48 @@
     }
 
     if (tab === 'entdecken') {
-      st.learn.forEach(function (b) { body.appendChild(block(b)); });
-      body.appendChild(weiter('Weiter zum Üben', '#/station/' + id + '/ueben'));
+      // In Kapitel aufteilen: jedes Text-Stück mit Überschrift beginnt ein neues Kapitel
+      var chapters = [];
+      st.learn.forEach(function (b) {
+        if (!chapters.length || (b.t === 'text' && b.h)) chapters.push({ title: b.h || st.short, blocks: [] });
+        chapters[chapters.length - 1].blocks.push(b);
+      });
+      var shown = Math.min(W.state.kapitel(id), chapters.length);
+      var leiste = h('ol', { class: 'kapitel-leiste', 'aria-label': 'Kapitel' });
+      var weiterBox = h('div', { class: 'weiter' });
+      function pills() {
+        leiste.innerHTML = '';
+        chapters.forEach(function (c, i) {
+          var li = h('li', { class: 'kapitel-leiste__punkt' + (i < shown ? ' kapitel-leiste__punkt--offen' : '') + (i === shown - 1 ? ' kapitel-leiste__punkt--jetzt' : '') },
+            i < shown ? h('a', { href: '#kap-' + i, onclick: function (e) { e.preventDefault(); document.getElementById('kap-' + i).scrollIntoView({ behavior: W.reducedMotion() ? 'auto' : 'smooth', block: 'start' }); } }, c.title) : h('span', null, c.title));
+          leiste.appendChild(li);
+        });
+      }
+      function chapterEl(i) {
+        return h('div', { class: 'kapitel', id: 'kap-' + i }, chapters[i].blocks.map(block));
+      }
+      function weiterKnopf() {
+        weiterBox.innerHTML = '';
+        if (shown < chapters.length) {
+          weiterBox.appendChild(h('button', { class: 'knopf knopf--primaer knopf--gross', type: 'button', onclick: function () {
+            var el = chapterEl(shown);
+            body.insertBefore(el, weiterBox);
+            shown++;
+            W.state.setKapitel(id, shown);
+            pills();
+            weiterKnopf();
+            setTimeout(function () { el.scrollIntoView({ behavior: W.reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }, 30);
+          } }, 'Weiter: ' + chapters[shown].title));
+          weiterBox.appendChild(h('p', { class: 'weiter__info' }, 'Kapitel ' + shown + ' von ' + chapters.length));
+        } else {
+          weiterBox.appendChild(h('a', { class: 'knopf knopf--primaer knopf--gross', href: '#/station/' + id + '/ueben' }, 'Weiter zum Üben'));
+        }
+      }
+      if (chapters.length > 1) body.appendChild(leiste);
+      for (var ci = 0; ci < shown; ci++) body.appendChild(chapterEl(ci));
+      body.appendChild(weiterBox);
+      pills();
+      weiterKnopf();
     } else if (tab === 'ueben') {
       st.practice.forEach(function (ex) {
         var holder = h('div');
@@ -165,10 +217,22 @@
     }
 
     seite.appendChild(kopf);
+    seite.appendChild(blase(tab === 'entdecken' ? W.AUFTRAG[id] : W.SPRUCH[tab], tab === 'entdecken' ? 'froh' : ''));
     seite.appendChild(nav);
     seite.appendChild(body);
     root.appendChild(seite);
   };
+
+  /* Försterin Lind mit Sprechblase */
+  function blase(text, stimmung, cls) {
+    var fig = h('div', { class: 'blase__fig' });
+    fig.innerHTML = A.foersterin(stimmung);
+    var t = h('p', { class: 'blase__text', 'aria-live': 'polite' }, text);
+    var el = h('div', { class: 'blase' + (cls ? ' ' + cls : '') }, fig, t);
+    el.sag = function (neu, st) { t.textContent = neu; fig.innerHTML = A.foersterin(st); };
+    return el;
+  }
+  V.blase = blase;
 
   function weiter(label, href) {
     return h('div', { class: 'weiter' }, h('a', { class: 'knopf knopf--primaer knopf--gross', href: href }, label));
@@ -242,7 +306,16 @@
         chips.appendChild(h('button', { class: 'knopf knopf--leise', type: 'button', onclick: function () { run(st.id); } }, st.short));
       });
       seite.appendChild(h('header', { class: 'station-kopf' }, svg(A.icon('diplom', 'station-kopf__ico')),
-        h('div', null, h('h1', null, 'Försterprüfung'), h('p', { class: 'station-kopf__ziel' }, 'Oben auf dem Hochsitz prüft die Försterin, ob du den Wald verstanden hast.'))));
+        h('div', null, h('h1', null, 'Försterprüfung'), h('p', { class: 'station-kopf__ziel' }, 'Auf dem Hochsitz wartet Försterin Lind mit 15 Fragen.'))));
+      seite.appendChild(blase('Komm hoch auf meinen Hochsitz! Ich stelle dir Fragen aus allen Stationen. Schaffst du 12 von 15, bekommst du das Walddiplom.', 'froh'));
+      var rs = d.rucksack.filter(function (rid) { return W.QUIZ.some(function (q) { return q.id === rid; }); });
+      if (rs.length) {
+        seite.appendChild(h('section', { class: 'rucksack' },
+          svg(A.icon('rucksack', 'rucksack__ico')),
+          h('div', null, h('h2', null, 'Dein Fehler-Rucksack'),
+            h('p', null, rs.length === 1 ? 'Eine Frage hast du falsch beantwortet. Beantwortest du sie jetzt richtig, fliegt sie raus.' : rs.length + ' Fragen hast du falsch beantwortet. Beantwortest du sie jetzt richtig, fliegen sie raus.'),
+            h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { run('rucksack'); } }, 'Rucksack leeren'))));
+      }
       seite.appendChild(h('section', { class: 'lern' },
         h('p', null, h('b', null, '15 Fragen'), ' aus allen sechs Stationen, gemischt. Nach jeder Frage siehst du sofort, ob du richtig lagst, und warum.'),
         h('p', null, 'Ab ', h('b', null, '12 richtigen Antworten (80 %)'), ' bekommst du das Walddiplom.'),
@@ -255,18 +328,24 @@
     }
 
     function run(only) {
-      var qs = W.logic.drawQuiz(W.QUIZ, only ? 8 : 15, Math.random, only);
-      var i = 0, right = 0, wrong = [], by = {};
+      var qs = only === 'rucksack'
+        ? W.shuffle(W.QUIZ.filter(function (q) { return W.state.data.rucksack.indexOf(q.id) >= 0; })).slice(0, 6)
+        : W.logic.drawQuiz(W.QUIZ, only ? 8 : 15, Math.random, only);
+      var i = 0, right = 0, wrong = [], by = {}, serie = 0;
+      if (!qs.length) { start(); return; }
       seite.innerHTML = '';
       var spur = h('ol', { class: 'spur', 'aria-label': 'Fortschritt' }, qs.map(function () { return h('li'); }));
       var stage = h('div', { class: 'pruefung' });
       var foot = h('div', { class: 'uebung__aktionen' });
+      var lind = blase(only === 'rucksack' ? 'Mal sehen, ob du diese Fragen jetzt kannst!' : 'Los geht’s! Lies jede Frage in Ruhe.', '', 'blase--klein');
       seite.appendChild(h('header', { class: 'pruefung__kopf' },
-        h('h1', null, only ? 'Themen-Training: ' + station(only).short : 'Försterprüfung'),
-        h('button', { class: 'knopf knopf--leise', type: 'button', onclick: function () { if (confirm('Prüfung abbrechen? Dein Fortschritt in dieser Runde geht verloren.')) start(); } }, 'Abbrechen')));
+        h('h1', null, only === 'rucksack' ? 'Rucksack leeren' : only ? 'Themen-Training: ' + station(only).short : 'Försterprüfung'),
+        h('button', { class: 'knopf knopf--leise', type: 'button', onclick: function () { if (confirm('Abbrechen? Deine Antworten in dieser Runde gehen verloren.')) start(); } }, 'Abbrechen')));
       seite.appendChild(spur);
+      seite.appendChild(lind);
       seite.appendChild(stage);
       seite.appendChild(foot);
+      function zufall(list) { return list[Math.floor(Math.random() * list.length)]; }
 
       function show() {
         stage.innerHTML = '';
@@ -279,7 +358,17 @@
           by[q.station].n++;
           spur.children[i].classList.remove('spur--jetzt');
           spur.children[i].classList.add(ok ? 'spur--gut' : 'spur--fehler');
-          if (ok) { right++; by[q.station].r++; } else wrong.push(q);
+          if (ok) { right++; by[q.station].r++; serie++; W.state.rucksackRemove(q.id); }
+          else { wrong.push(q); serie = 0; W.state.rucksackAdd(q.id); }
+          if (ok && serie > 0 && serie % 3 === 0) {
+            W.state.addAcorns(1);
+            W.toast('Serie! +1 Eichel', 'eichel');
+            lind.sag(W.SPRUCH.serie, 'froh');
+            spur.classList.add('spur--serie');
+          } else {
+            lind.sag(ok ? zufall(W.SPRUCH.richtig) : zufall(W.SPRUCH.falsch), ok ? 'froh' : 'hm');
+            if (!ok) spur.classList.remove('spur--serie');
+          }
           var last = i === qs.length - 1;
           foot.appendChild(h('button', { class: 'knopf knopf--primaer knopf--gross', type: 'button', onclick: function () { if (last) end(); else { i++; show(); window.scrollTo(0, 0); } } }, last ? 'Ergebnis ansehen' : 'Nächste Frage'));
           foot.lastChild.focus({ preventScroll: true });
@@ -299,7 +388,9 @@
         seite.appendChild(h('header', { class: 'station-kopf' }, svg(A.icon('diplom', 'station-kopf__ico')),
           h('div', null, h('h1', null, right + ' von ' + qs.length + ' richtig'),
             h('p', { class: 'station-kopf__ziel' }, h('b', null, '+' + right * 2 + ' Eicheln. '),
-              earned ? 'Bestanden! Das Walddiplom gehört dir.' : only ? 'Themen-Training beendet.'
+              earned ? 'Bestanden! Das Walddiplom gehört dir.'
+                : only === 'rucksack' ? (W.state.data.rucksack.length ? 'Noch ' + W.state.data.rucksack.length + (W.state.data.rucksack.length === 1 ? ' Frage' : ' Fragen') + ' im Rucksack.' : 'Dein Rucksack ist leer. Super!')
+                : only ? 'Themen-Training beendet.'
                 : fehlt === 1 ? 'Nur eine einzige Antwort hat zum Diplom gefehlt! Gleich nochmal?'
                   : pct >= 0.6 ? 'Gut! Für das Diplom fehlen noch ' + fehlt + ' richtige Antworten.'
                     : 'Wiederhole die Stationen unten, dann klappt es beim nächsten Mal.'))));
@@ -368,9 +459,10 @@
   /* =========================================================
      Feldbuch
      ========================================================= */
-  V.feldbuch = function (root) {
+  V.feldbuch = function (root, anker) {
     var d = W.state.data;
     var seite = h('div', { class: 'seite feldbuch' });
+    if (anker) setTimeout(function () { var el = document.getElementById(anker); if (el) el.scrollIntoView({ block: 'start' }); }, 60);
     seite.appendChild(h('header', { class: 'station-kopf' }, svg(A.icon('feldbuch', 'station-kopf__ico')),
       h('div', null, h('h1', null, 'Feldbuch'), h('p', { class: 'station-kopf__ziel' }, 'Dein Lernzettel für den Abend vor der Arbeit.'))));
 
@@ -384,6 +476,17 @@
       h('p', null, 'Dein Rang wächst wie ein Baum durch die Stockwerke: ', h('b', null, 'Keimling'), ' (Moosschicht) → ', h('b', null, 'Setzling'), ' (Krautschicht, ab 2 Stempeln) → ', h('b', null, 'Jungbaum'), ' (Strauchschicht, ab 4) → ', h('b', null, 'Waldriese'), ' (Baumschicht, alle 6).'),
       h('p', null, 'Gesammelt: ', h('b', null, W.state.data.acorns + ' Eicheln'), '. Eicheln gibt es für jede Übung, jeden abgehakten Punkt beim Erklären und jede richtige Prüfungsfrage.')));
     if (d.diplom) seite.appendChild(diplom(d.diplom));
+
+    var gh = h('div', { class: 'geheimnisse' });
+    W.GEHEIMNISSE.forEach(function (g) {
+      var offen = d.acorns >= g.ab;
+      gh.appendChild(h('div', { class: 'geheimnis' + (offen ? '' : ' geheimnis--zu') },
+        svg(A.icon(offen ? g.icon : 'eichel', 'geheimnis__ico')),
+        h('div', null, h('b', null, offen ? g.titel : 'Noch verschlossen'),
+          h('p', null, offen ? g.text : 'Ab ' + g.ab + ' Eicheln. Dir fehlen noch ' + (g.ab - d.acorns) + '.'))));
+    });
+    seite.appendChild(h('section', { class: 'lern nicht-drucken', id: 'geheimnisse' }, h('h2', null, 'Wald-Geheimnisse'),
+      h('p', null, 'Mit deinen Eicheln schaltest du Geheimnisse aus dem Wald frei. Eicheln gibt es für Übungen, Erklärungen, Missionen und jede richtige Prüfungsfrage.'), gh));
 
     seite.appendChild(h('div', { class: 'uebung__aktionen nicht-drucken' },
       h('button', { class: 'knopf knopf--primaer', type: 'button', onclick: function () { window.print(); } }, 'Lernzettel drucken')));

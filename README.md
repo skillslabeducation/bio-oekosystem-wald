@@ -17,6 +17,8 @@ Sechs Stationen auf einer illustrierten Waldkarte, jeweils mit *Entdecken*, *Üb
 
 Dazu: Försterprüfung (15 gemischte Fragen, Walddiplom ab 80 %), Feldbuch mit allen Merksätzen zum Ausdrucken, Operatoren-Übersicht und Lernplan.
 
+Damit es spannend bleibt: Försterin Lind führt mit Aufträgen durch die Stationen, der Simulator hat eine echte Mission, falsch beantwortete Prüfungsfragen landen im Fehler-Rucksack, der eigene Baum wächst mit jedem Stempel vom Keimling zum Waldriesen, und gesammelte Eicheln schalten Wald-Geheimnisse frei.
+
 ## Technik
 
 - Reines HTML, CSS und JavaScript, ohne Build-Schritt und ohne externe Dienste.

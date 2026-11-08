@@ -129,6 +129,19 @@
     return 'Wenig Käfer, wenig Nahrung: Die Spechte ziehen weniger Junge groß und werden weniger.';
   };
 
+  /** Simulator-Mission: drei Jahre hintereinander nahe am Mittelwert, höchstens 12 Jahre nach dem Käfer-Sommer. */
+  L.MISSION = { jahre: 15, kMin: 48, kMax: 72, sMin: 16, sMax: 24 };
+  L.simMission = function (hist, startIdx) {
+    var M = L.MISSION;
+    var since = hist.length - 1 - startIdx;
+    if (startIdx == null || since < 3) return { status: 'laeuft', jahre: Math.max(0, since) };
+    var last = hist.slice(-3);
+    var ok = last.every(function (d) { return d.K >= M.kMin && d.K <= M.kMax && d.S >= M.sMin && d.S <= M.sMax; });
+    if (ok && since <= M.jahre) return { status: 'geschafft', jahre: since };
+    if (since >= M.jahre) return { status: 'verpasst', jahre: since };
+    return { status: 'laeuft', jahre: since };
+  };
+
   /* ---------- Ränge: wie ein Baum, der durch alle Stockwerke wächst ---------- */
   L.RANKS = [
     { min: 0, name: 'Keimling', layer: 'Moosschicht' },

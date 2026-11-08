@@ -7,7 +7,7 @@ const ROOT = path.join(__dirname, '..');
 const FILES = [
   'js/util.js', 'js/logic.js', 'js/state.js',
   'js/inhalt/operatoren.js', 'js/inhalt/stockwerke.js', 'js/inhalt/nahrung.js', 'js/inhalt/gleichgewicht.js',
-  'js/inhalt/konkurrenz.js', 'js/inhalt/nische.js', 'js/inhalt/bestimmung.js', 'js/inhalt/pruefung.js',
+  'js/inhalt/konkurrenz.js', 'js/inhalt/nische.js', 'js/inhalt/bestimmung.js', 'js/inhalt/pruefung.js', 'js/inhalt/geschichte.js',
   'js/art-blaetter.js', 'js/art-wald.js', 'js/uebungen.js', 'js/bausteine.js', 'js/ansichten.js'
 ];
 

@@ -35,7 +35,7 @@
     document.body.dataset.ansicht = parts[0] || 'karte';
     if (parts[0] === 'station') W.views.station(main, parts[1], parts[2]);
     else if (parts[0] === 'pruefung') W.views.pruefung(main);
-    else if (parts[0] === 'feldbuch') W.views.feldbuch(main);
+    else if (parts[0] === 'feldbuch') W.views.feldbuch(main, parts[1]);
     else W.views.karte(main);
     kopf();
     var titles = { station: function () { var s = W.stations.filter(function (x) { return x.id === parts[1]; })[0]; return s ? s.short : ''; }, pruefung: function () { return 'Försterprüfung'; }, feldbuch: function () { return 'Feldbuch'; } };
@@ -46,7 +46,10 @@
 
   function boot() {
     W.state.load();
+    var geheim = W.state.geheimnisse();
     W.state.on(function () {
+      var g = W.state.geheimnisse();
+      if (g > geheim) { geheim = g; setTimeout(function () { W.toast('Neues Wald-Geheimnis im Feldbuch!', 'geheim'); }, 600); }
       var z = document.querySelector('.eicheln__zahl');
       if (z) {
         z.textContent = String(W.state.data.acorns);
