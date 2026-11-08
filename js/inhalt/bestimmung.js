@@ -9,7 +9,7 @@
     kastanie: { name: 'Rosskastanie', merkmale: 'zusammengesetzt, gefingert: 5 bis 7 große Blättchen an einem Punkt, Rand gesägt', frucht: 'Kastanien in einer stacheligen Hülle' },
     esche: { name: 'Gemeine Esche', merkmale: 'zusammengesetzt, gefiedert: 9 bis 15 Blättchen paarweise an einer Mittelachse, Rand gesägt', frucht: 'geflügelte Nüsschen' },
     eiche: { name: 'Stieleiche', merkmale: 'einfach, gelappt mit abgerundeten Lappen, Blattstiel sehr kurz', frucht: 'Eicheln an langen Stielen' },
-    ahorn: { name: 'Ahorn', merkmale: 'einfach, handförmig gelappt mit meist 5 spitzen Lappen, Blattstiel lang', frucht: 'Propeller-Früchte („Nasenzwicker“)' },
+    ahorn: { name: 'Ahorn', merkmale: 'einfach, handförmig gelappt mit meist 5 spitzen Lappen, Blattstiel lang (z. B. Spitz- oder Bergahorn)', frucht: 'Propeller-Früchte („Nasenzwicker“)' },
     buche: { name: 'Rotbuche', merkmale: 'einfach, eiförmig, Rand glatt (ganzrandig) und leicht gewellt', frucht: 'Bucheckern' },
     linde: { name: 'Winterlinde', merkmale: 'einfach, herzförmig, am Grund oft schief, Rand gesägt', frucht: 'Nüsschen an einem Flugblatt' },
     birke: { name: 'Hängebirke', merkmale: 'einfach, dreieckig bis rautenförmig, lang zugespitzt, doppelt gesägt', frucht: 'winzige geflügelte Nüsschen' },
@@ -27,7 +27,7 @@
     f2: {
       nr: 2, frage: 'Wie sitzen die Blättchen am Stiel?',
       a: { text: 'Alle Blättchen entspringen an einem Punkt, wie die Finger einer Hand (gefingert).', bild: 'gefingert', result: 'kastanie' },
-      b: { text: 'Die Blättchen sitzen paarweise links und rechts an einer Mittelachse (gefiedert).', bild: 'gefiedert', result: 'esche' }
+      b: { text: 'Die Blättchen sitzen paarweise links und rechts an einer Mittelachse, mit einem Endblättchen an der Spitze (gefiedert).', bild: 'gefiedert', result: 'esche' }
     },
     f3: {
       nr: 3, frage: 'Ist das Blatt gelappt?',
@@ -36,8 +36,8 @@
     },
     f4: {
       nr: 4, frage: 'Wie sehen die Lappen aus?',
-      a: { text: 'Die Lappen sind abgerundet. Der Blattstiel ist sehr kurz.', bild: 'lappen-rund', result: 'eiche' },
-      b: { text: 'Die Lappen laufen spitz zu, meist sind es 5 wie bei einer Hand. Der Blattstiel ist lang.', bild: 'lappen-spitz', result: 'ahorn' }
+      a: { text: 'Die Lappen sind abgerundet. Der Blattstiel ist meist kurz.', bild: 'lappen-rund', result: 'eiche' },
+      b: { text: 'Das Blatt ist handförmig, meist mit 5 spitz zulaufenden Lappen. Der Blattstiel ist lang.', bild: 'lappen-spitz', result: 'ahorn' }
     },
     f5: {
       nr: 5, frage: 'Wie sieht der Blattrand aus?',
@@ -45,9 +45,9 @@
       b: { text: 'Der Rand hat viele kleine Zähnchen (gesägt).', bild: 'gesaegt', next: 'f6' }
     },
     f6: {
-      nr: 6, frage: 'Ist das Blatt herzförmig?',
-      a: { text: 'Ja: Das Blatt ist herzförmig, am Grund oft etwas schief.', bild: 'herz', result: 'linde' },
-      b: { text: 'Nein: Das Blatt ist nicht herzförmig.', bild: 'nichtherz', next: 'f7' }
+      nr: 6, frage: 'Wie breit ist das Blatt im Vergleich zur Länge?',
+      a: { text: 'Fast so breit wie lang, rundlich und am Grund deutlich herzförmig eingebuchtet, oft etwas schief.', bild: 'herz', result: 'linde' },
+      b: { text: 'Deutlich länger als breit, am Grund nicht deutlich herzförmig.', bild: 'nichtherz', next: 'f7' }
     },
     f7: {
       nr: 7, frage: 'Welche Form hat das Blatt?',
@@ -66,8 +66,8 @@
       {
         t: 'text', h: 'Wie ein Detektiv',
         p: [
-          'Mit einem <b>Bestimmungsschlüssel</b> findest du heraus, von welchem Baum ein Blatt stammt. Du beginnst bei Frage 1. Jede Frage hat <b>zwei Möglichkeiten</b>. Du liest beide, vergleichst sie mit deinem Blatt und wählst die passende. Sie führt dich zur nächsten Frage, bis am Ende ein Name steht.',
-          'Dafür musst du die Fachwörter kennen, mit denen man Blätter beschreibt.'
+          'Mit einem <b>Bestimmungsschlüssel</b> findest du heraus, von welchem Baum ein Blatt stammt. Du beginnst bei Frage 1. Bei einem gabelartigen (dichotomen) Schlüssel hat jede Frage <b>zwei Möglichkeiten</b>. Du liest beide, vergleichst sie mit deinem Blatt und wählst die passende. Sie führt dich zur nächsten Frage, bis am Ende ein Name steht.',
+          'Der Schlüssel aus deinem Unterricht sieht vielleicht etwas anders aus. Das Vorgehen ist aber immer gleich. Dafür musst du die Fachwörter kennen, mit denen man Blätter beschreibt.'
         ]
       },
       { t: 'widget', w: 'blattteile' },
@@ -117,7 +117,7 @@
         id: 'be-quiz', type: 'quiz', h: 'Schlüssel-Fragen',
         task: 'Vier Fragen zum Bestimmen.',
         questions: [
-          { kind: 'single', q: 'Wie viele Möglichkeiten gibt es bei jeder Frage eines Bestimmungsschlüssels?', options: ['eine', 'zwei', 'drei', 'so viele wie Bäume'], answer: 1, why: 'Ein Bestimmungsschlüssel stellt immer zwei Möglichkeiten gegenüber.' },
+          { kind: 'single', keep: true, q: 'Wie viele Möglichkeiten gibt es bei jeder Frage eines gabelartigen (dichotomen) Bestimmungsschlüssels?', options: ['eine', 'zwei', 'drei', 'so viele wie Bäume'], answer: 1, why: 'Ein gabelartiger Schlüssel stellt bei jeder Frage zwei Möglichkeiten gegenüber, wie eine Weggabelung.' },
           { kind: 'single', q: 'Ein Blatt ist gelappt. Was musst du als Nächstes klären, um Eiche und Ahorn zu unterscheiden?', options: ['Ob die Lappen rund oder spitz sind', 'Ob das Blatt grün ist', 'Wie alt der Baum ist', 'Ob das Blatt gefiedert ist'], answer: 0, why: 'Runde Lappen und kurzer Stiel: Eiche. Spitze Lappen und langer Stiel: Ahorn.' },
           { kind: 'single', q: 'Ein Blatt besteht aus sieben Blättchen, die alle an einem Punkt entspringen. Welcher Baum ist es?', options: ['Esche', 'Rosskastanie', 'Linde', 'Buche'], answer: 1, why: 'Gefingert mit 5 bis 7 Blättchen: Rosskastanie.' },
           { kind: 'tf', q: 'Wenn ein Blatt gesägt ist, ist es auf jeden Fall eine Birke.', answer: false, why: 'Falsch. Linde, Hainbuche, Kastanie und Esche haben auch gesägte Ränder. Du musst den Schlüssel bis zum Ende durchgehen.' }
@@ -152,7 +152,7 @@
     merke: [
       '<b>Bestimmungsschlüssel:</b> Schritt für Schritt zwischen zwei Möglichkeiten entscheiden, bis der Name erscheint. Immer beide Möglichkeiten lesen!',
       'Blattteile: Blattspreite (Blattfläche), Blattstiel, Blattrand, Mittelrippe und Blattadern.',
-      'Fachwörter: <b>einfach</b> oder <b>zusammengesetzt</b> (gefingert, gefiedert); Rand <b>ganzrandig</b>, <b>gesägt</b> oder <b>gelappt</b>; Formen: herz-, ei-, rautenförmig.',
+      'Fachwörter: Blattbau <b>einfach</b> oder <b>zusammengesetzt</b> (gefingert, gefiedert). Blattform: <b>gelappt</b> oder ungelappt; herz-, ei-, rautenförmig. Blattrand: <b>ganzrandig</b> (glatt), <b>gesägt</b>, doppelt gesägt.',
       'Rosskastanie: gefingert. Esche: gefiedert. Eiche: runde Lappen. Ahorn: spitze Lappen. Buche: glatter Rand. Linde: herzförmig. Birke: rautenförmig, doppelt gesägt. Hainbuche: doppelt gesägt, parallele Adern.'
     ]
   });

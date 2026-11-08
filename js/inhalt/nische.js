@@ -25,11 +25,11 @@
       },
       {
         t: 'fact', h: 'Vorsicht, Falle!',
-        html: 'Die ökologische Nische ist <b>kein Ort</b> und kein Versteck. Merksatz: <b>Der Lebensraum ist die Adresse, die Nische ist der Beruf.</b>'
+        html: 'Die ökologische Nische ist <b>nicht einfach ein Ort</b> oder ein Versteck. Ein Versteck oder ein Nistplatz gehört zwar dazu, aber die Nische umfasst alles, was die Art zum Leben braucht, und wie sie ihre Umwelt nutzt. Merksatz: <b>Der Lebensraum ist die Adresse, die Nische ist der Beruf.</b>'
       },
       {
         t: 'text', h: 'Jede Art hat ihre Strategie',
-        p: ['Alle Tiere brauchen zum Überleben Nahrung sowie Schlaf- und Nistplätze. Je nach Art kommen weitere Bedingungen hinzu. Tippe auf die Karten.']
+        p: ['Alle Tiere brauchen zum Überleben Nahrung sowie Schlaf- und Nistplätze. Je nach Art kommen weitere Bedingungen hinzu. Wildschweine zum Beispiel brauchen Schlammsuhlen gegen Parasiten, also Plagegeister wie Zecken und Läuse. Tippe auf die Karten.']
       },
       { t: 'widget', w: 'nischen' },
       {
@@ -75,7 +75,7 @@
         id: 'ni-check', type: 'quiz', h: 'Nischen-Check',
         task: 'Stimmt die Aussage?',
         questions: [
-          { kind: 'tf', q: 'Die ökologische Nische ist das Versteck eines Tieres.', answer: false, why: 'Falsch. Die Nische ist kein Ort, sondern die Art und Weise, wie ein Lebewesen lebt und seine Umwelt nutzt (der „Beruf“).' },
+          { kind: 'tf', q: 'Die ökologische Nische ist das Versteck eines Tieres.', answer: false, why: 'Ein Versteck kann zur Nische gehören, aber die Nische ist viel mehr: alles, was ein Lebewesen zum Leben braucht, und wie es seine Umwelt nutzt (der „Beruf“).' },
           { kind: 'tf', q: 'Auch Pflanzen haben eine ökologische Nische.', answer: true, why: 'Richtig. Beispiele: Lianen klettern zum Licht, Frühblüher blühen vor dem Laubaustrieb.' },
           { kind: 'tf', q: 'Bunt- und Grünspecht haben dieselbe ökologische Nische.', answer: false, why: 'Falsch. Sie nutzen verschiedene Nahrung an verschiedenen Orten und haben deshalb verschiedene Nischen.' },
           { kind: 'tf', q: 'Zwei Arten mit genau derselben Nische können auf Dauer nicht zusammenleben.', answer: true, why: 'Richtig. Eine würde die andere verdrängen.' },
@@ -87,11 +87,11 @@
       {
         id: 'ni-e1', op: 'Erläutere',
         task: 'Erläutere, was man unter einer ökologischen Nische versteht. Nutze dabei ein Beispiel.',
-        model: 'Die ökologische Nische ist die <b>Gesamtheit dessen, was ein Lebewesen zum Leben braucht</b>, und die Art, wie es seine Umwelt nutzt: seine Nahrung, wie und wo es sie findet, seine Schlaf- und Nistplätze und wie es sich schützt. Man kann sie mit dem <b>Beruf</b> eines Menschen vergleichen, oder auch als <b>Überlebensstrategie</b> bezeichnen. Die Nische ist kein Ort.<br><b>Beispiel:</b> Die Nische des Grünspechts: Er sucht mit seiner langen, klebrigen Zunge am Boden nach Ameisen, ist durch sein grünes Gefieder auf Wiesen getarnt und übernachtet in Baumhöhlen.',
+        model: 'Die ökologische Nische ist die <b>Gesamtheit dessen, was ein Lebewesen zum Leben braucht</b>, und die Art, wie es seine Umwelt nutzt: seine Nahrung, wie und wo es sie findet, seine Schlaf- und Nistplätze und wie es sich schützt. Man kann sie mit dem <b>Beruf</b> eines Menschen vergleichen, oder auch als <b>Überlebensstrategie</b> bezeichnen. Sie ist mehr als nur ein Ort.<br><b>Beispiel:</b> Die Nische des Grünspechts: Er sucht mit seiner langen, klebrigen Zunge am Boden nach Ameisen, ist durch sein grünes Gefieder auf Wiesen getarnt und übernachtet in Baumhöhlen.',
         points: [
           'Gesamtheit dessen, was ein Lebewesen zum Leben braucht.',
           'Dazu gehört, wie es seine Umwelt nutzt (Nahrung, Schlaf- und Nistplatz, Schutz).',
-          'Vergleich mit einem Beruf oder einer Überlebensstrategie; kein Ort.',
+          'Vergleich mit einem Beruf oder einer Überlebensstrategie; mehr als nur ein Ort.',
           'Ein passendes Beispiel, genau beschrieben.'
         ],
         starter: ['Unter einer ökologischen Nische versteht man …', 'Man kann sie mit … vergleichen.', 'Ein Beispiel ist …']
@@ -123,7 +123,7 @@
     ],
     merke: [
       '<b>Ökologische Nische</b> = die Gesamtheit dessen, was ein Lebewesen zum Leben braucht, und wie es seine Umwelt nutzt (seine „Überlebensstrategie“).',
-      'Merksatz: Der Lebensraum ist die Adresse, die Nische ist der Beruf. Die Nische ist kein Ort!',
+      'Merksatz: Der Lebensraum ist die Adresse, die Nische ist der Beruf. Die Nische ist mehr als ein Ort oder Versteck.',
       'Bäckerei-Vergleich: zu viele gleiche Berufe → zu wenig Kundschaft (Konkurrenz) → anderen Beruf suchen oder besser sein (Spezialisierung).',
       'Beispiele: Wildschwein (Schlammsuhle gegen Parasiten), Kaninchen (Verstecke), Kamel (Wüste, wenig Wasser), Liane (klettert zum Licht), Frühblüher (blühen vor dem Laubaustrieb).',
       'Verschiedene Nischen = wenig Konkurrenz (Bunt- und Grünspecht).'

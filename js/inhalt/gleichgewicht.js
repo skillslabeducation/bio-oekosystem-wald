@@ -76,27 +76,27 @@
           {
             id: 'fuchs', title: 'Eine Krankheit lässt viele Füchse sterben.', start: { who: 'Füchse', dir: '-' },
             steps: [
-              { who: 'Mäuse', answer: '+', why: 'Die Mäuse haben weniger Fressfeinde. Mehr Mäuse überleben.' },
-              { who: 'Rehe', answer: '+', why: 'Füchse erbeuten junge Rehkitze. Mit weniger Füchsen überleben mehr Kitze.' },
-              { who: 'Mäusebussarde', answer: '+', why: 'Es gibt mehr Mäuse und weniger Konkurrenz durch den Fuchs. Die Bussarde finden mehr Nahrung.' },
-              { who: 'junge Bäume', answer: '-', why: 'Mehr Rehe fressen mehr Knospen und Triebe junger Bäume.' }
+              { who: 'Mäuse', frage: 'den Mäusen', answer: '+', why: 'Die Mäuse haben weniger Fressfeinde. Mehr Mäuse überleben.' },
+              { who: 'Mäusebussarde', frage: 'den Mäusebussarden', answer: '+', why: 'Es gibt mehr Mäuse und weniger Konkurrenz durch den Fuchs. Die Bussarde finden mehr Nahrung.' },
+              { who: 'Bucheckern und andere Samen', frage: 'den Bucheckern und anderen Samen am Boden', answer: '-', why: 'Die vielen Mäuse fressen mehr Samen. Es bleiben weniger übrig, aus denen junge Bäume keimen können.' },
+              { who: 'Mäuse (einige Jahre später)', frage: 'den Mäusen einige Jahre später', answer: '-', why: 'Jetzt gibt es mehr Bussarde und weniger Futter. Die Zahl der Mäuse sinkt wieder. Das Gleichgewicht pendelt sich ein.' }
             ]
           },
           {
             id: 'mast', title: 'Ein Mastjahr: Fichten und Haselsträucher tragen besonders viele Zapfen und Nüsse.', start: { who: 'Zapfen und Nüsse', dir: '+' },
             steps: [
-              { who: 'Eichhörnchen', answer: '+', why: 'Eichhörnchen finden reichlich Futter und ziehen mehr Junge groß.' },
-              { who: 'Mäuse', answer: '+', why: 'Auch Mäuse fressen Samen und Nüsse. Sie vermehren sich stark.' },
-              { who: 'Füchse und Bussarde (im Jahr danach)', answer: '+', why: 'Mehr Beute bedeutet mehr Nachwuchs bei den Räubern.' },
-              { who: 'Mäuse (zwei Jahre später)', answer: '-', why: 'Jetzt gibt es mehr Räuber und wieder normal viel Futter. Die Zahl der Mäuse sinkt. Das Gleichgewicht pendelt sich ein.' }
+              { who: 'Eichhörnchen', frage: 'den Eichhörnchen', answer: '+', why: 'Eichhörnchen finden reichlich Futter und ziehen mehr Junge groß.' },
+              { who: 'Mäuse', frage: 'den Mäusen', answer: '+', why: 'Auch Mäuse fressen Samen und Nüsse. Sie vermehren sich stark.' },
+              { who: 'Füchse und Bussarde (im Jahr danach)', frage: 'den Füchsen und Bussarden im Jahr danach', answer: '+', why: 'Mehr Beute bedeutet mehr Nachwuchs bei den Räubern.' },
+              { who: 'Mäuse (zwei Jahre später)', frage: 'den Mäusen zwei Jahre später', answer: '-', why: 'Jetzt gibt es mehr Räuber und wieder normal viel Futter. Die Zahl der Mäuse sinkt. Das Gleichgewicht pendelt sich ein.' }
             ]
           },
           {
             id: 'gift', title: 'Im Wald und auf den Wiesen werden viele Pestizide gegen Insekten gespritzt.', start: { who: 'Insekten und Ameisen', dir: '-' },
             steps: [
-              { who: 'Buntspechte', answer: '-', why: 'Sie finden weniger Käferlarven und Spinnen und ziehen weniger Junge groß.' },
-              { who: 'Grünspechte', answer: '-', why: 'Ihre Hauptnahrung, die Ameisen, wird weniger.' },
-              { who: 'Habichte', answer: '-', why: 'Der Habicht jagt unter anderem Spechte. Gibt es weniger Spechte, findet er weniger Beute.' }
+              { who: 'Buntspechte', frage: 'den Buntspechten', answer: '-', why: 'Sie finden weniger Käferlarven und Spinnen und ziehen weniger Junge groß.' },
+              { who: 'Grünspechte', frage: 'den Grünspechten', answer: '-', why: 'Ihre Hauptnahrung, die Ameisen, wird weniger.' },
+              { who: 'Waldeidechsen', frage: 'den Waldeidechsen', answer: '-', why: 'Waldeidechsen fressen Insekten und Spinnen. Ihnen fehlt die Nahrung.' }
             ]
           }
         ]
@@ -140,11 +140,11 @@
       {
         id: 'gg-e3', op: 'Beschreibe',
         task: 'In einem Jahr vermehren sich die Eichhörnchen sehr stark, weil es viele Fichtenzapfen und Haselnüsse gibt. Beschreibe, wie sich das auf andere Lebewesen der Lebensgemeinschaft auswirkt. Kennzeichne Zunahme mit + und Abnahme mit −.',
-        model: 'Eichhörnchen <b>+</b>: Sie finden viel Futter.<br>Fuchs und Mäusebussard <b>+</b>: Sie finden mehr Beute und ziehen mehr Junge groß.<br>Zapfen und Nüsse <b>−</b>: Die vielen Eichhörnchen fressen mehr davon, und weniger Samen keimen zu jungen Bäumen.<br>Eichhörnchen später <b>−</b>: Mehr Räuber und weniger Futter lassen ihre Zahl wieder sinken. Das Gleichgewicht pendelt sich wieder ein.',
+        model: 'Eichhörnchen <b>+</b>: Sie finden viel Futter.<br>Räuber wie der Fuchs (und gelegentlich der Mäusebussard) <b>+</b>: Sie finden mehr Beute und ziehen mehr Junge groß.<br>Keimlinge und junge Fichten und Haseln <b>−</b>: Die vielen Eichhörnchen fressen mehr Samen, also keimen weniger.<br>Eichhörnchen später <b>−</b>: Mehr Räuber und weniger Futter lassen ihre Zahl wieder sinken. Das Gleichgewicht pendelt sich wieder ein.',
         points: [
           'Eichhörnchen + (viel Futter).',
-          'Räuber wie Fuchs und Mäusebussard + (mehr Beute).',
-          'Zapfen, Nüsse und junge Bäume − (mehr wird gefressen).',
+          'Räuber wie der Fuchs + (mehr Beute).',
+          'Keimlinge und junge Bäume − (mehr Samen werden gefressen).',
           'Später wieder weniger Eichhörnchen: Das Gleichgewicht stellt sich wieder ein.'
         ],
         starter: ['Zuerst …', 'Dadurch …', 'Nach einiger Zeit …']

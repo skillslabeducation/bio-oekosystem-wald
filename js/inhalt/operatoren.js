@@ -9,6 +9,7 @@
     'Erläutere': 'Erkläre und mach es zusätzlich an einem Beispiel deutlich.',
     'Begründe': 'Stütze deine Aussage mit Argumenten. Am Ende steht ein Fazit (deshalb …).',
     'Vergleiche': 'Stelle Gemeinsamkeiten und Unterschiede gegenüber.',
+    'Zeichne': 'Stelle etwas als ordentliche Skizze dar und beschrifte sie vollständig.',
     'Stelle eine Vermutung auf': 'Überlege, was der Grund sein könnte, und schreib ihn als Vermutung auf: „Ich vermute, dass …, weil …“'
   };
 })();

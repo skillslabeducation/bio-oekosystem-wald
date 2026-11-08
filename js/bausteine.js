@@ -91,8 +91,8 @@
   B.rollen = function () {
     var R = [
       { id: 'p', icon: 'baum', name: 'Produzenten', alt: 'Erzeuger', tun: 'stellen mit Sonnenlicht durch Fotosynthese Nährstoffe her und geben Sauerstoff ab', bsp: 'Buche, Fichte, Farn, Moos, Bärlauch' },
-      { id: 'k', icon: 'reh', name: 'Konsumenten', alt: 'Verbraucher', tun: 'fressen Pflanzen (1. Ordnung) oder andere Tiere (2., 3. Ordnung)', bsp: 'Reh, Borkenkäfer, Buntspecht, Fuchs, Habicht' },
-      { id: 'd', icon: 'pilz', name: 'Destruenten', alt: 'Zersetzer', tun: 'bauen tote Reste (Laub, Totholz, Kot, tote Tiere) zu Mineralstoffen ab', bsp: 'Bakterien, Pilze, Regenwurm, Tausendfüßer, Assel' }
+      { id: 'k', icon: 'reh', name: 'Konsumenten', alt: 'Verbraucher', tun: 'sind Tiere, die lebende Pflanzen (1. Ordnung) oder andere Tiere (2., 3. Ordnung) fressen', bsp: 'Reh, Borkenkäfer, Buntspecht, Fuchs, Habicht' },
+      { id: 'd', icon: 'pilz', name: 'Destruenten', alt: 'Zersetzer', tun: 'bauen tote Reste (Laub, Totholz, Kot, tote Tiere) zu Mineralstoffen ab', bsp: 'Bakterien, Pilze (keine Pflanzen!), Regenwurm, Tausendfüßer, Assel' }
     ];
     return h('div', { class: 'rollen' }, R.map(function (r) {
       return h('div', { class: 'rolle rolle--' + r.id },
@@ -105,8 +105,8 @@
 
   /* ---------- Nahrungskette ---------- */
   var KETTEN = [
-    { name: 'Nadelwald', glieder: [['fichte', 'Fichte', 'Produzent'], ['kaefer', 'Borkenkäfer', 'Konsument 1. Ordnung'], ['specht', 'Buntspecht', 'Konsument 2. Ordnung'], ['habicht', 'Habicht', 'Konsument 3. Ordnung, Endkonsument']] },
-    { name: 'Laubwald', glieder: [['blatt', 'Eichenblatt', 'Produzent'], ['raupe', 'Raupe', 'Konsument 1. Ordnung'], ['meise', 'Blaumeise', 'Konsument 2. Ordnung'], ['sperber', 'Sperber', 'Konsument 3. Ordnung, Endkonsument']] }
+    { name: 'Nadelwald', glieder: [['fichte', 'Fichte', 'Produzent'], ['kaefer', 'Borkenkäfer', 'Konsument 1. Ordnung'], ['specht', 'Buntspecht', 'Konsument 2. Ordnung'], ['habicht', 'Habicht', 'Konsument 3. Ordnung, Ende dieser Kette']] },
+    { name: 'Laubwald', glieder: [['blatt', 'Eichenblatt', 'Produzent'], ['raupe', 'Raupe', 'Konsument 1. Ordnung'], ['meise', 'Blaumeise', 'Konsument 2. Ordnung'], ['sperber', 'Sperber', 'Konsument 3. Ordnung, Ende dieser Kette']] }
   ];
   B.kette = function () {
     var box = h('div', { class: 'kette' });
@@ -135,7 +135,7 @@
     { id: 'k', ico: 'reh', name: 'Konsumenten', a: 125, text: 'Tiere fressen Pflanzen oder andere Tiere. So gelangen die Stoffe in ihren Körper.' },
     { id: 'reste', ico: 'laub', name: 'tote Reste', a: 180, text: 'Auf dem Waldboden landen Laub und Totholz (direkt von den Pflanzen, gestrichelter Pfeil) sowie Kot und tote Tiere (von den Konsumenten).' },
     { id: 'd', ico: 'pilz', name: 'Destruenten', a: 235, text: 'Regenwürmer, Asseln und Tausendfüßer zerkleinern die Reste. Pilze und Bakterien bauen sie vollständig ab.' },
-    { id: 'm', ico: 'mineral', name: 'Mineralstoffe', a: 305, text: 'Übrig bleiben Mineralstoffe, Wasser und Kohlenstoffdioxid. Die Pflanzen nehmen die Mineralstoffe mit ihren Wurzeln wieder auf. Der Kreis ist geschlossen.' }
+    { id: 'm', ico: 'mineral', name: 'Mineralstoffe', a: 305, text: 'Übrig bleiben Mineralstoffe, Wasser und Kohlenstoffdioxid. Die Pflanzen nehmen die Mineralstoffe mit ihren Wurzeln wieder auf, das Kohlenstoffdioxid (das auch alle Tiere ausatmen) mit den Blättern. Der Kreis ist geschlossen.' }
   ];
   var KC = { x: 50, y: 56, r: 35 };
   function kpos(a) { var r = a * Math.PI / 180; return [KC.x + KC.r * Math.sin(r), KC.y - KC.r * Math.cos(r)]; }
@@ -223,7 +223,7 @@
       var svg = el.querySelector('svg');
       svg.addEventListener('pointermove', function (e) { hover(e, svg, start, win, pl, pr, Wd); });
       svg.addEventListener('pointerdown', function (e) { hover(e, svg, start, win, pl, pr, Wd); });
-      svg.addEventListener('pointerleave', function () { tip.hidden = true; });
+      svg.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') tip.hidden = true; });
     }
     function hover(e, svg, start, win, pl, pr, Wd) {
       var r = svg.getBoundingClientRect();
@@ -276,7 +276,17 @@
         hist.push(L.simYear(prev, netz));
       }
       var a = hist[hist.length - 2], b = hist[hist.length - 1];
-      story.textContent = 'Jahr ' + (hist.length - 1) + ': ' + L.simStory(a, b);
+      if (nYears === 1) {
+        story.textContent = 'Jahr ' + (hist.length - 1) + ': ' + L.simStory(a, b);
+      } else {
+        var last = hist.slice(-nYears);
+        var ks = last.map(function (d) { return d.K; }), ss = last.map(function (d) { return d.S; });
+        var kMin = Math.round(Math.min.apply(null, ks)), kMax = Math.round(Math.max.apply(null, ks));
+        var sMin = Math.round(Math.min.apply(null, ss)), sMax = Math.round(Math.max.apply(null, ss));
+        story.textContent = (kMax - kMin < 12 && sMax - sMin < 5)
+          ? 'Jahr ' + (hist.length - 1) + ': Die Kurven liegen fast auf dem Mittelwert. Das Gleichgewicht ist stabil.'
+          : 'Jahr ' + (hist.length - 1) + ': In ' + nYears + ' Jahren schwankten die Käfer zwischen ' + kMin + ' und ' + kMax + ' Tausend, die Spechte zwischen ' + sMin + ' und ' + sMax + '. Beide pendeln um ihren Mittelwert.';
+      }
       draw();
     }
     function event(fn, text) {
@@ -300,7 +310,7 @@
     netzBox.addEventListener('change', function () {
       netz = netzBox.checked;
       story.textContent = netz
-        ? 'Netz an: Buntkäfer und Schlupfwespen fressen mit, die Spechte haben auch andere Beute. Spul 10 Jahre vor und vergleiche die Kurven.'
+        ? 'Netz an: Buntkäfer fressen Borkenkäfer, Schlupfwespen legen ihre Eier in die Käferlarven, und die Spechte haben auch andere Beute. Spul 10 Jahre vor und vergleiche die Kurven.'
         : 'Netz aus: Nur Specht und Borkenkäfer. Die Zahlen schwanken stark.';
     });
     var netzLab = h('label', { class: 'schalter' }, netzBox, h('span', { class: 'schalter__bahn', 'aria-hidden': 'true' }), h('span', null, 'Netz aus vielen Beziehungen'));
@@ -439,7 +449,7 @@
       ['gefiedert', 'gefiedert', 'Blättchen paarweise an einer Achse, wie eine Feder'],
       ['gelappt', 'gelappt', 'tief eingebuchtet, mit Lappen'],
       ['ganzrandig', 'ganzrandig', 'Rand glatt, ohne Zähnchen'],
-      ['gesaegt', 'gesägt', 'Rand mit Zähnchen wie eine Säge'],
+      ['gesaegt', 'gesägt', 'Rand mit Zähnchen wie eine Säge; doppelt gesägt: große und kleine Zähne im Wechsel'],
       ['herz', 'herzförmig', 'wie ein Herz, am Stiel eingebuchtet'],
       ['raute', 'rautenförmig', 'wie eine Raute, mit Ecken']
     ];

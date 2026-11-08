@@ -123,7 +123,7 @@
   /** Was passiert gerade? Kurzer Satz für die Erzählung im Simulator. */
   L.simStory = function (prev, cur) {
     var kUp = cur.K > prev.K, sUp = cur.S > prev.S;
-    if (kUp && !sUp) return 'Wenige Spechte, viel Nahrung: Die Borkenkäfer vermehren sich.';
+    if (kUp && !sUp) return 'Wenige Spechte, also wenige Feinde: Die Borkenkäfer vermehren sich wieder.';
     if (kUp && sUp) return 'Viele Käfer: Die Spechte finden viel Nahrung und ziehen mehr Junge groß.';
     if (!kUp && sUp) return 'Viele Spechte fressen viele Käfer: Die Käfer werden weniger.';
     return 'Wenig Käfer, wenig Nahrung: Die Spechte ziehen weniger Junge groß und werden weniger.';

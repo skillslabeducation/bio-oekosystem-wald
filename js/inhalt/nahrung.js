@@ -27,10 +27,14 @@
       },
       { t: 'widget', w: 'rollen' },
       {
+        t: 'fact', h: 'Vorsicht, Falle!',
+        html: '<b>Pilze sind keine Pflanzen.</b> Sie haben kein Blattgrün und können keine Fotosynthese betreiben. Im Wald gehören sie zu den Destruenten.<br><b>Nicht jedes Tier ist ein Konsument.</b> Regenwürmer, Asseln und Tausendfüßer sind Tiere, fressen aber tote Reste. Deshalb zählen sie zu den Destruenten.'
+      },
+      {
         t: 'text', h: 'Die Nahrungskette',
         p: [
-          'Wer frisst wen? Das zeigt eine <b>Nahrungskette</b>. Sie beginnt <b>immer mit einem Produzenten</b>, denn nur Pflanzen stellen Nahrung selbst her.',
-          'Pflanzenfresser sind <b>Konsumenten 1. Ordnung</b>. Wer Pflanzenfresser frisst, ist ein <b>Konsument 2. Ordnung</b>, und so weiter. Am Ende steht ein Tier ohne natürliche Feinde, der <b>Endkonsument</b>.'
+          'Wer frisst wen? Das zeigt eine <b>Nahrungskette</b>. Sie beginnt <b>immer mit einem Produzenten</b>, denn nur Pflanzen stellen Nahrung selbst her. Die Glieder einer Kette nennt man <b>Nahrungsstufen</b>.',
+          'Pflanzenfresser sind <b>Konsumenten 1. Ordnung</b>. Wer Pflanzenfresser frisst, ist ein <b>Konsument 2. Ordnung</b>, und so weiter. Am Ende steht der <b>Endkonsument</b>: In dieser Kette wird er von keinem anderen Tier mehr gefressen. Die Destruenten verwerten die Reste aller Stufen.'
         ]
       },
       { t: 'widget', w: 'kette' },
@@ -49,7 +53,11 @@
       { t: 'widget', w: 'kreislauf' },
       {
         t: 'merke',
-        html: 'Die Stoffe wandern im Kreis: <b>Produzenten → Konsumenten → Destruenten → Mineralstoffe → Produzenten</b>. Deshalb spricht man von einem <b>Stoffkreislauf</b>. Die Energie dafür liefert die Sonne.'
+        html: 'Die Stoffe wandern im Kreis: <b>Produzenten → (Konsumenten) → Destruenten → Mineralstoffe, Wasser und Kohlenstoffdioxid → Produzenten</b>. Laub und Totholz gelangen auch direkt zu den Destruenten. Deshalb spricht man von einem <b>Stoffkreislauf</b>. Die Energie dafür liefert die Sonne.'
+      },
+      {
+        t: 'fact', h: 'Auch die Luft gehört dazu',
+        html: 'Tiere und Zersetzer atmen Sauerstoff ein und geben Kohlenstoffdioxid ab. Die Pflanzen nehmen das Kohlenstoffdioxid für die Fotosynthese wieder auf und geben Sauerstoff ab. Auch hier schließt sich ein Kreis.'
       },
       {
         t: 'reveal',
@@ -76,18 +84,18 @@
           { id: 'n3', label: 'Farn', bucket: 'p', why: 'Farne sind grüne Pflanzen, also Produzenten.' },
           { id: 'n4', label: 'Bärlauch', bucket: 'p', why: 'Bärlauch ist eine grüne Pflanze, also ein Produzent.' },
           { id: 'n5', label: 'Reh', bucket: 'k', why: 'Das Reh frisst Pflanzen: Konsument 1. Ordnung.' },
-          { id: 'n6', label: 'Borkenkäfer', bucket: 'k', why: 'Der Borkenkäfer frisst lebendes Holz und ist deshalb ein Konsument.' },
+          { id: 'n6', label: 'Borkenkäfer', bucket: 'k', why: 'Der Borkenkäfer frisst die Bastschicht unter der Rinde lebender Fichten. Er ist ein Pflanzenfresser, also Konsument 1. Ordnung.' },
           { id: 'n7', label: 'Buntspecht', bucket: 'k', why: 'Der Buntspecht frisst Insekten: Konsument.' },
           { id: 'n8', label: 'Fuchs', bucket: 'k', why: 'Der Fuchs frisst andere Tiere: Konsument.' },
           { id: 'n9', label: 'Regenwurm', bucket: 'd', why: 'Der Regenwurm frisst totes Laub und zersetzt es: Destruent.' },
           { id: 'n10', label: 'Bakterien', bucket: 'd', why: 'Bakterien bauen tote Reste zu Mineralstoffen ab: Destruenten.' },
-          { id: 'n11', label: 'Pilze an totem Holz', bucket: 'd', why: 'Diese Pilze zersetzen Totholz: Destruenten.' },
+          { id: 'n11', label: 'Pilze an totem Holz', bucket: 'd', why: 'Pilze sind keine Pflanzen und betreiben keine Fotosynthese. Diese Pilze zersetzen Totholz: Destruenten.' },
           { id: 'n12', label: 'Tausendfüßer', bucket: 'd', why: 'Tausendfüßer zerkleinern Laub: Destruenten.' }
         ]
       },
       {
         id: 'na-kette', type: 'order', h: 'Bau eine Nahrungskette',
-        task: 'Tippe die Lebewesen in der richtigen Reihenfolge an. Beginne mit dem, der gefressen wird.',
+        task: 'Tippe die Lebewesen in der richtigen Reihenfolge an. Beginne mit dem Produzenten.',
         arrows: true,
         items: [
           { id: 'eb', label: 'Eichenblatt' },
@@ -110,7 +118,7 @@
       {
         id: 'na-kreis', type: 'cloze', h: 'Der Stoffkreislauf als Lückentext',
         task: 'Tippe auf ein Wort unten. Es landet in der markierten Lücke. Tippst du eine gefüllte Lücke an, wird sie wieder frei.',
-        text: 'Grüne Pflanzen sind {Produzenten}. Mithilfe von {Sonnenlicht} stellen sie aus Wasser und {Kohlenstoffdioxid} Traubenzucker her. Dabei entsteht {Sauerstoff}. Tiere sind {Konsumenten}: Sie fressen Pflanzen oder andere Tiere. Abgestorbene Pflanzenteile, Kot und tote Tiere werden von {Destruenten} wie Bakterien, Pilzen und Regenwürmern abgebaut. Dabei entstehen {Mineralstoffe}, die die Pflanzen mit ihren {Wurzeln} wieder aufnehmen. So schließt sich der {Kreislauf}.',
+        text: 'Grüne Pflanzen sind {Produzenten}. Mithilfe von {Sonnenlicht} stellen sie aus Wasser und {Kohlenstoffdioxid} Traubenzucker her. Dabei entsteht {Sauerstoff}. Tiere, die lebende Pflanzen oder andere Tiere fressen, sind {Konsumenten}. Laub, Totholz, Kot und tote Tiere werden von {Destruenten} wie Bakterien, Pilzen und Regenwürmern abgebaut. Dabei entstehen {Mineralstoffe}, die die Pflanzen mit ihren {Wurzeln} wieder aufnehmen. So schließt sich der {Kreislauf}.',
         extra: ['Mondlicht', 'Blüten', 'Fleischfresser']
       }
     ],
@@ -118,10 +126,10 @@
       {
         id: 'na-e1', op: 'Erkläre',
         task: 'Erkläre, was Produzenten, Konsumenten und Destruenten sind und welche Aufgabe sie im Wald haben.',
-        model: '<b>Produzenten</b> (Erzeuger) sind die grünen Pflanzen. Sie stellen mithilfe von Sonnenlicht durch Fotosynthese Traubenzucker her und geben dabei Sauerstoff ab. Damit erzeugen sie die Nahrung für alle anderen.<br><b>Konsumenten</b> (Verbraucher) sind die Tiere. Sie können keine Nahrung selbst herstellen und fressen deshalb Pflanzen oder andere Tiere.<br><b>Destruenten</b> (Zersetzer) sind z. B. Bakterien, Pilze, Regenwürmer und Tausendfüßer. Sie bauen tote Reste wie Laub, Totholz, Kot und tote Tiere zu Mineralstoffen ab. Diese nehmen die Pflanzen wieder auf.',
+        model: '<b>Produzenten</b> (Erzeuger) sind die grünen Pflanzen. Sie stellen mithilfe von Sonnenlicht durch Fotosynthese Traubenzucker her und geben dabei Sauerstoff ab. Damit erzeugen sie die Nahrung für alle anderen.<br><b>Konsumenten</b> (Verbraucher) sind Tiere, die lebende Pflanzen oder andere Tiere fressen. Sie können keine Nahrung selbst herstellen.<br><b>Destruenten</b> (Zersetzer) sind z. B. Bakterien, Pilze, Regenwürmer und Tausendfüßer. Sie bauen tote Reste wie Laub, Totholz, Kot und tote Tiere zu Mineralstoffen ab. Diese nehmen die Pflanzen wieder auf.',
         points: [
           'Produzenten = grüne Pflanzen; stellen mit Sonnenlicht durch Fotosynthese Nährstoffe her und geben Sauerstoff ab.',
-          'Konsumenten = Tiere; fressen Pflanzen oder andere Tiere.',
+          'Konsumenten = Tiere, die lebende Pflanzen oder andere Tiere fressen.',
           'Destruenten = Bakterien, Pilze, Regenwürmer …; bauen tote Reste zu Mineralstoffen ab.',
           'Die Mineralstoffe nehmen die Pflanzen wieder auf.'
         ],
@@ -130,7 +138,7 @@
       {
         id: 'na-e2', op: 'Erläutere',
         task: 'Erläutere, warum man von einem Stoffkreislauf spricht.',
-        model: 'Die Stoffe werden im Wald immer wieder verwendet. Die <b>Produzenten</b> bauen mit Sonnenlicht aus Wasser, Kohlenstoffdioxid und Mineralstoffen ihren Körper auf. <b>Konsumenten</b> fressen die Pflanzen oder andere Tiere und nehmen die Stoffe so auf. Abgestorbene Pflanzenteile, Kot und tote Tiere werden von den <b>Destruenten</b> zu Mineralstoffen abgebaut. Diese nehmen die Pflanzen mit ihren Wurzeln wieder auf. Damit ist der Kreis geschlossen.<br>Beispiel: Ein Buchenblatt fällt im Herbst zu Boden, Regenwürmer und Bakterien zersetzen es, und die Mineralstoffe daraus helfen im nächsten Jahr der Buche beim Wachsen.',
+        model: 'Die Stoffe werden im Wald immer wieder verwendet. Die <b>Produzenten</b> bauen mit Sonnenlicht aus Wasser, Kohlenstoffdioxid und Mineralstoffen ihren Körper auf. <b>Konsumenten</b> fressen die Pflanzen oder andere Tiere und nehmen die Stoffe so auf. Laub und Totholz, Kot und tote Tiere werden von den <b>Destruenten</b> zu Mineralstoffen, Wasser und Kohlenstoffdioxid abgebaut. Die Pflanzen nehmen die Mineralstoffe mit ihren Wurzeln wieder auf. Damit ist der Kreis geschlossen.<br>Beispiel: Ein Buchenblatt fällt im Herbst zu Boden, Regenwürmer und Bakterien zersetzen es, und die Mineralstoffe daraus helfen im nächsten Jahr der Buche beim Wachsen.',
         points: [
           'Produzenten bauen aus einfachen Stoffen Nährstoffe auf.',
           'Konsumenten nehmen die Stoffe über die Nahrung auf.',
@@ -154,11 +162,11 @@
     ],
     merke: [
       '<b>Produzenten</b> (Erzeuger) = grüne Pflanzen. Sie stellen mit Sonnenlicht durch <b>Fotosynthese</b> Traubenzucker her und geben Sauerstoff ab.',
-      'Fotosynthese: Kohlenstoffdioxid + Wasser → (Licht, Blattgrün) → Traubenzucker + Sauerstoff.',
-      '<b>Konsumenten</b> (Verbraucher) = Tiere. Pflanzenfresser = 1. Ordnung, wer Pflanzenfresser frisst = 2. Ordnung usw. Am Ende steht der Endkonsument.',
-      '<b>Destruenten</b> (Zersetzer) = Bakterien, Pilze, Regenwürmer, Tausendfüßer, Asseln. Sie bauen tote Reste (Laub, Totholz, Kot, tote Tiere) zu Mineralstoffen ab.',
-      'Nahrungskette: Pfeil = „wird gefressen von“. Viele verknüpfte Ketten = Nahrungsnetz.',
-      '<b>Stoffkreislauf:</b> Produzenten → Konsumenten → Destruenten → Mineralstoffe → Produzenten. Die Energie liefert die Sonne.'
+      'Zusatzwissen Fotosynthese: Kohlenstoffdioxid + Wasser → (Licht, Blattgrün) → Traubenzucker + Sauerstoff.',
+      '<b>Konsumenten</b> (Verbraucher) = Tiere, die lebende Pflanzen oder andere Tiere fressen. Pflanzenfresser = 1. Ordnung, wer Pflanzenfresser frisst = 2. Ordnung usw. Der Endkonsument steht am Ende der Kette.',
+      '<b>Destruenten</b> (Zersetzer) = Bakterien, Pilze, Regenwürmer, Tausendfüßer, Asseln. Sie bauen tote Reste (Laub, Totholz, Kot, tote Tiere) zu Mineralstoffen ab. Pilze sind keine Pflanzen!',
+      'Nahrungskette: Die Glieder heißen Nahrungsstufen. Pfeil = „wird gefressen von“. Viele verknüpfte Ketten = Nahrungsnetz.',
+      '<b>Stoffkreislauf:</b> Produzenten → (Konsumenten) → Destruenten → Mineralstoffe → Produzenten. Laub und Totholz gehen direkt zu den Destruenten. Die Energie liefert die Sonne.'
     ]
   });
 })();

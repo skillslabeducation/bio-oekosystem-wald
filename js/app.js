@@ -21,7 +21,7 @@
         h('a', { class: 'kopf__link' + (route.indexOf('#/feldbuch') === 0 ? ' kopf__link--an' : ''), href: '#/feldbuch' }, svg(A.icon('feldbuch', 'kopf__ico')), h('span', null, 'Feldbuch')),
         h('a', { class: 'kopf__link' + (route.indexOf('#/pruefung') === 0 ? ' kopf__link--an' : ''), href: '#/pruefung' }, svg(A.icon('diplom', 'kopf__ico')), h('span', null, 'Prüfung'))),
       h('div', { class: 'kopf__stand' },
-        h('span', { class: 'rang', title: 'Dein Rang wächst mit jedem Stempel' }, h('span', { class: 'rang__name' }, rank.name)),
+        h('a', { class: 'rang', href: '#/feldbuch', title: 'Dein Rang wächst mit jedem Stempel', 'aria-label': 'Rang: ' + rank.name + '. Mehr im Feldbuch' }, h('span', { class: 'rang__name' }, rank.name)),
         h('span', { class: 'eicheln', 'aria-label': d.acorns + ' Eicheln' }, svg(A.icon('eichel', 'eicheln__ico')), h('b', { class: 'eicheln__zahl' }, String(d.acorns))))));
   }
 
@@ -29,6 +29,9 @@
     var main = document.getElementById('inhalt');
     var parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
     main.innerHTML = '';
+    var toasts = document.getElementById('toast');
+    if (toasts) toasts.innerHTML = '';
+    Array.prototype.forEach.call(document.querySelectorAll('.feier'), function (f) { f.remove(); });
     document.body.dataset.ansicht = parts[0] || 'karte';
     if (parts[0] === 'station') W.views.station(main, parts[1], parts[2]);
     else if (parts[0] === 'pruefung') W.views.pruefung(main);

@@ -148,7 +148,7 @@
       }
     ],
     merke: [
-      '<b>Konkurrenz:</b> Mehrere Lebewesen wollen oder brauchen dasselbe (Nahrung, Nistplatz, Licht …). Es gibt Gewinner und Verlierer.',
+      '<b>Konkurrenz:</b> Mehrere Lebewesen wollen oder brauchen dasselbe (Nahrung, Nistplatz, Licht …). Oft gibt es dabei Gewinner und Verlierer.',
       '<b>Buntspecht</b> (20–25 cm): meißelartiger Schnabel, Zunge mit Widerhaken, Larven und Spinnen aus der Borke, im Winter Samen; Wälder und Parks.',
       '<b>Grünspecht</b> (28–32 cm): spitzer Schnabel, klebrige Zunge bis 10 cm, vor allem Ameisen am Boden; Waldränder, Parks, Streuobstwiesen.',
       'Kaum Konkurrenz zwischen den beiden, weil sie verschiedene Nahrung an verschiedenen Orten suchen. Je ähnlicher die Ansprüche, desto größer die Konkurrenz.',

@@ -1,10 +1,12 @@
 /* Übungs-Bausteine: Zuordnen, Reihenfolge, Lückentext, Fragen, Wirkungskette, Blatt-Detektiv, Erklär-Training.
-   Alles per Tippen bedienbar; Kärtchen lassen sich zusätzlich ziehen. */
+   Alles per Tippen bedienbar; Kärtchen lassen sich zusätzlich ziehen (auf dem Tablet: kurz gedrückt halten). */
 (function () {
   'use strict';
   var W = (window.W = window.W || {});
   var h = W.h;
   var X = (W.ex = {});
+
+  function smooth() { return W.reducedMotion() ? 'auto' : 'smooth'; }
 
   /* ---------- gemeinsamer Rahmen ---------- */
   function frame(ex, ctx) {
@@ -12,14 +14,15 @@
     var rueck = h('div', { class: 'rueck', 'aria-live': 'polite' });
     var aktionen = h('div', { class: 'uebung__aktionen' });
     var body = h('div', { class: 'uebung__body' });
+    var fuss = h('div', { class: 'uebung__fuss' }, rueck, aktionen);
     var el = h('section', { class: 'uebung uebung--' + ex.type, id: 'ex-' + ex.id },
       h('div', { class: 'uebung__kopf' }, h('h3', null, ex.h), status),
       ex.task ? h('p', { class: 'uebung__auftrag' }, ex.task) : null,
-      body, h('div', { class: 'uebung__fuss' }, aktionen, rueck));
+      body, fuss);
 
     function showStatus() {
       var r = W.state.data.ex[ex.id];
-      status.innerHTML = r ? W.art.icon('eichel', 'ico--klein') + ' ' + W.logic.acornsFor(r.best) + ' von 10' : '';
+      status.innerHTML = r ? W.art.icon('eichel', 'ico--klein') + ' ' + W.logic.acornsFor(r.best) + ' Eicheln' : '';
       el.classList.toggle('uebung--erledigt', !!r);
     }
     showStatus();
@@ -34,6 +37,10 @@
         aktionen.innerHTML = '';
         list.forEach(function (b) { if (b) aktionen.appendChild(b); });
       },
+      /** Rückmeldung und Knöpfe ins Bild holen */
+      reveal: function () {
+        setTimeout(function () { fuss.scrollIntoView({ block: 'nearest', behavior: smooth() }); }, 40);
+      },
       finish: function (score) {
         var gain = W.state.recordExercise(ex.id, score);
         showStatus();
@@ -47,56 +54,100 @@
     return h('button', { class: 'knopf ' + (cls || ''), type: 'button', onclick: fn }, label);
   }
 
-  function lobText(score) {
+  function lobText(score, solved) {
+    if (solved) return 'Lies dir die Lösung in Ruhe durch. Mit „Nochmal üben“ kannst du es gleich selbst schaffen.';
     if (score >= 1) return 'Alles richtig beim ersten Versuch. Stark!';
     if (score >= 0.8) return 'Fast alles auf Anhieb richtig.';
     if (score >= 0.5) return 'Gut, und jetzt sitzt es.';
     return 'Geschafft. Diese Übung lohnt sich, noch einmal zu machen.';
   }
 
-  /* ---------- Ziehen mit Finger oder Maus ---------- */
+  /** Begründung einer Frage; bei Stimmt/Stimmt-nicht eindeutig formuliert */
+  X.whyText = function (q) {
+    var w = q.why || '';
+    if (q.kind === 'tf') {
+      w = w.replace(/^(Richtig|Falsch)[.!:]?\s*/, '');
+      w = (q.answer ? 'Die Aussage stimmt. ' : 'Die Aussage stimmt nicht. ') + w;
+    }
+    return w;
+  };
+  X.answerText = function (q) {
+    if (q.kind === 'tf') return q.answer ? 'Stimmt' : 'Stimmt nicht';
+    if (q.kind === 'multi') return q.answer.map(function (k) { return q.options[k]; }).join(', ');
+    if (q.kind === 'binary') return q.labels[q.answer];
+    return q.options[q.answer];
+  };
+
+  /* ---------- Ziehen: Maus sofort, Finger nach kurzem Halten (sonst wird gescrollt) ---------- */
   function enableDrag(chip, canDrag, onDrop) {
-    var suppress = false;
+    var suppress = false, active = false;
     chip.addEventListener('click', function (e) { if (suppress) { e.stopImmediatePropagation(); e.preventDefault(); suppress = false; } }, true);
+    chip.addEventListener('touchmove', function (e) { if (active) e.preventDefault(); }, { passive: false });
+    chip.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     chip.addEventListener('pointerdown', function (e) {
       if (!canDrag() || e.button > 0) return;
-      var sx = e.clientX, sy = e.clientY, ghost = null, rect = chip.getBoundingClientRect(), over = null;
+      var touch = e.pointerType !== 'mouse';
+      var sx = e.clientX, sy = e.clientY, lx = sx, ly = sy;
+      var ghost = null, rect = null, over = null, timer = null, scroller = null;
+
       function target(x, y) {
         var el = document.elementFromPoint(x, y);
-        if (!el) return null;
-        return el.closest('[data-drop]');
+        return el ? el.closest('[data-drop]') : null;
+      }
+      function place() {
+        ghost.style.transform = 'translate(' + (lx - rect.width / 2) + 'px,' + (ly - rect.height / 2) + 'px) rotate(-2deg)';
+        var t = target(lx, ly);
+        if (t !== over) { if (over) over.classList.remove('drop--ueber'); over = t; if (over) over.classList.add('drop--ueber'); }
+      }
+      function start() {
+        active = true;
+        rect = chip.getBoundingClientRect();
+        ghost = chip.cloneNode(true);
+        ghost.classList.add('kaertchen--geist');
+        ghost.style.width = rect.width + 'px';
+        document.body.appendChild(ghost);
+        chip.classList.add('kaertchen--zieht');
+        try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { /* egal */ }
+        place();
+        scroller = setInterval(function () {
+          if (ly < 90) window.scrollBy(0, -14);
+          else if (ly > window.innerHeight - 90) window.scrollBy(0, 14);
+          else return;
+          place();
+        }, 16);
       }
       function move(ev) {
-        if (!ghost && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 8) {
-          ghost = chip.cloneNode(true);
-          ghost.classList.add('kaertchen--geist');
-          ghost.style.width = rect.width + 'px';
-          document.body.appendChild(ghost);
-          chip.classList.add('kaertchen--zieht');
+        lx = ev.clientX; ly = ev.clientY;
+        if (!ghost) {
+          var d = Math.hypot(lx - sx, ly - sy);
+          if (touch) { if (d > 10) stop(); return; }
+          if (d > 6) start(); else return;
         }
-        if (ghost) {
-          ev.preventDefault();
-          ghost.style.transform = 'translate(' + (ev.clientX - rect.width / 2) + 'px,' + (ev.clientY - rect.height / 2) + 'px) rotate(-2deg)';
-          var t = target(ev.clientX, ev.clientY);
-          if (t !== over) { if (over) over.classList.remove('drop--ueber'); over = t; if (over) over.classList.add('drop--ueber'); }
-        }
+        ev.preventDefault();
+        place();
       }
-      function end(ev) {
+      function stop() {
+        clearTimeout(timer);
+        clearInterval(scroller);
         window.removeEventListener('pointermove', move);
         window.removeEventListener('pointerup', end);
         window.removeEventListener('pointercancel', end);
+      }
+      function end(ev) {
+        stop();
+        active = false;
         if (over) over.classList.remove('drop--ueber');
-        if (ghost) {
-          ghost.remove();
-          chip.classList.remove('kaertchen--zieht');
-          suppress = true;
-          setTimeout(function () { suppress = false; }, 50);
-          if (ev.type === 'pointerup') {
-            var t = target(ev.clientX, ev.clientY);
-            if (t) onDrop(t.getAttribute('data-drop'));
-          }
+        if (!ghost) return;
+        ghost.remove();
+        chip.classList.remove('kaertchen--zieht');
+        suppress = true;
+        setTimeout(function () { suppress = false; }, 60);
+        if (ev.type === 'pointerup') {
+          var t = target(ev.clientX, ev.clientY);
+          if (t) onDrop(t.getAttribute('data-drop'));
         }
       }
+      if (touch) timer = setTimeout(start, 230);
       window.addEventListener('pointermove', move, { passive: false });
       window.addEventListener('pointerup', end);
       window.addEventListener('pointercancel', end);
@@ -107,7 +158,7 @@
     if (it.leaf) {
       var wrap = h('span', { class: 'kaertchen__bild' });
       wrap.innerHTML = W.art.leaf(it.leaf, { title: it.label });
-      return [wrap, h('span', { class: 'kaertchen__name' }, it.label)];
+      return wrap;
     }
     return it.label;
   }
@@ -117,11 +168,13 @@
      ========================================================= */
   X.sort = function (ex, ctx) {
     var F = frame(ex, ctx);
-    var placement = {}, locked = {}, selected = null, first = null, finished = false;
+    var placement = {}, locked = {}, selected = null, first = null, finished = false, tries = 0;
     var chips = {};
     var pool = h('div', { class: 'ablage', 'data-drop': '__pool' });
     var faecher = h('div', { class: 'faecher faecher--' + ex.buckets.length + (ex.visual ? ' faecher--bild' : '') });
     var lists = {};
+    var byId = {};
+    ex.items.forEach(function (it) { byId[it.id] = it; });
 
     pool.addEventListener('click', function (e) {
       if (e.target.closest('.kaertchen')) return;
@@ -140,7 +193,7 @@
     });
 
     W.shuffle(ex.items).forEach(function (it) {
-      var c = h('button', { class: 'kaertchen' + (it.leaf ? ' kaertchen--bild' : ''), type: 'button', dataset: { id: it.id } }, chipContent(it));
+      var c = h('button', { class: 'kaertchen kaertchen--ziehbar' + (it.leaf ? ' kaertchen--bild' : ''), type: 'button', dataset: { id: it.id }, 'aria-label': it.label }, chipContent(it));
       c.addEventListener('click', function () {
         if (locked[it.id] || finished) return;
         if (selected === it.id) { select(null); return; }
@@ -173,18 +226,37 @@
       if (finished) return;
       checkBtn.disabled = !allPlaced();
       if (!allPlaced()) F.say(left === ex.items.length ? '' : 'Noch ' + left + ' Kärtchen übrig.');
-      else F.say('Alle Kärtchen liegen. Prüfe deine Zuordnung.');
+      else { F.say('Alle Kärtchen liegen. Prüfe deine Zuordnung.'); F.reveal(); }
     }
 
     var checkBtn = btn('Prüfen', 'knopf--primaer', check);
     function check() {
+      tries++;
       var res = W.logic.gradeSort(ex.items, placement);
       if (first === null) first = res.score;
       res.correct.forEach(function (id) { locked[id] = true; chips[id].classList.add('kaertchen--richtig'); chips[id].classList.remove('kaertchen--falsch'); });
       res.wrong.forEach(function (id) { chips[id].classList.add('kaertchen--falsch'); });
-      if (!res.wrong.length) return done();
-      F.say('<b>' + res.correct.length + ' von ' + ex.items.length + ' richtig.</b> Die rot umrandeten Kärtchen gehören in ein anderes Fach.', 'fehler');
+      if (!res.wrong.length) { done(); F.reveal(); return; }
+      var msg = '<b>' + res.correct.length + ' von ' + ex.items.length + ' richtig.</b> Die rot umrandeten Kärtchen gehören in ein anderes Fach.';
+      if (tries >= 2) {
+        msg += '<p>Ein Tipp zu jedem roten Kärtchen:</p><ul class="gruende">' + res.wrong.map(function (id) {
+          return '<li>' + (byId[id].leaf ? '' : '<b>' + W.esc(byId[id].label) + ':</b> ') + W.esc(tipp(byId[id])) + '</li>';
+        }).join('') + '</ul>';
+      }
+      F.say(msg, 'fehler');
       F.buttons([btn('Falsche zurücklegen', 'knopf--primaer', retry), btn('Lösung zeigen', 'knopf--leise', solve)]);
+      F.reveal();
+    }
+    /* Tipp: Begründung ohne den Namen des Fachs */
+    function tipp(it) {
+      var t = it.why || '';
+      ex.buckets.forEach(function (b) {
+        var word = b.label.split(/[ (:]/)[0];
+        if (word.length < 4) return;
+        var stem = word.length > 6 ? word.slice(0, -2) : word;
+        t = t.replace(new RegExp(stem + '[a-zäöüß]*', 'gi'), '____');
+      });
+      return t;
     }
     function retry() {
       ex.items.forEach(function (it) { if (!locked[it.id]) place(it.id, null); });
@@ -195,17 +267,19 @@
       var tips = [];
       ex.items.forEach(function (it) {
         if (!locked[it.id]) {
-          tips.push('<li><b>' + W.esc(it.label) + ':</b> ' + W.esc(it.why || '') + '</li>');
+          tips.push('<li>' + (it.leaf ? '' : '<b>' + W.esc(it.label) + ':</b> ') + W.esc(it.why || '') + '</li>');
           place(it.id, [].concat(it.bucket)[0]);
           locked[it.id] = true;
           chips[it.id].classList.add('kaertchen--geloest');
         }
       });
       done(tips);
+      F.reveal();
     }
     function done(tips) {
       finished = true;
-      F.say((tips && tips.length ? '<p>So gehört es:</p><ul class="gruende">' + tips.join('') + '</ul>' : '') + '<p class="lob">' + lobText(first) + '</p>', 'gut');
+      var solved = !!(tips && tips.length);
+      F.say((solved ? '<p>So gehört es:</p><ul class="gruende">' + tips.join('') + '</ul>' : '') + '<p class="lob">' + lobText(first, solved) + '</p>', 'gut');
       F.buttons([btn('Nochmal üben', 'knopf--leise', function () { ctx.redo(); })]);
       F.finish(first);
     }
@@ -286,6 +360,7 @@
       if (finished) return;
       checkBtn.disabled = !full;
       F.say(full ? 'Alles gelegt. Prüfe die Reihenfolge.' : '');
+      if (full) F.reveal();
     }
     function check() {
       var res = W.logic.gradeOrder(order, slots);
@@ -294,10 +369,11 @@
         if (ok) { locked[k] = true; slotEls[k].classList.add('reihe__platz--richtig'); chips[slots[k]].classList.add('kaertchen--richtig'); }
         else { slotEls[k].classList.add('reihe__platz--falsch'); chips[slots[k]].classList.add('kaertchen--falsch'); }
       });
-      if (res.score === 1) return done(false);
+      if (res.score === 1) { done(false); F.reveal(); return; }
       var wrong = res.slots.filter(function (x) { return !x; }).length;
       F.say('<b>' + wrong + (wrong === 1 ? ' Platz stimmt' : ' Plätze stimmen') + ' noch nicht.</b> Die grünen bleiben liegen.', 'fehler');
       F.buttons([btn('Falsche zurücklegen', 'knopf--primaer', retry), btn('Lösung zeigen', 'knopf--leise', solve)]);
+      F.reveal();
     }
     function retry() {
       for (var k = 0; k < n; k++) if (!locked[k] && slots[k]) unplace(k);
@@ -308,10 +384,11 @@
       for (var k = 0; k < n; k++) if (!locked[k] && slots[k]) unplace(k);
       order.forEach(function (id, k) { if (!locked[k]) { put(k, id); chips[id].classList.add('kaertchen--geloest'); locked[k] = true; } });
       done(true);
+      F.reveal();
     }
     function done(solved) {
       finished = true;
-      F.say((solved ? '<p>So ist die richtige Reihenfolge.</p>' : '') + '<p class="lob">' + lobText(first) + '</p>', 'gut');
+      F.say((solved ? '<p>So ist die richtige Reihenfolge (gelb markiert, was noch gefehlt hat).</p>' : '') + '<p class="lob">' + lobText(first, solved) + '</p>', 'gut');
       F.buttons([btn('Nochmal üben', 'knopf--leise', function () { ctx.redo(); })]);
       F.finish(Math.max(0, first));
     }
@@ -358,7 +435,7 @@
       wordEls[o.i] = b;
       bank.appendChild(b);
     });
-    var used = {}; // wordIndex -> gap
+    var used = {};
 
     function setActive(k) {
       active = k;
@@ -367,7 +444,7 @@
     function nextEmpty(from) {
       for (var j = 0; j < gaps.length; j++) {
         var k = (from + j) % gaps.length;
-        if (!filled[k]) return k;
+        if (filled[k] == null) return k;
       }
       return -1;
     }
@@ -407,6 +484,7 @@
       if (finished) return;
       checkBtn.disabled = left > 0;
       F.say(left ? 'Noch ' + left + (left === 1 ? ' Lücke.' : ' Lücken.') : 'Alle Lücken gefüllt. Prüfe deinen Text.');
+      if (!left) F.reveal();
     }
     var checkBtn = btn('Prüfen', 'knopf--primaer', check);
     function check() {
@@ -417,10 +495,11 @@
         if (ok) { locked[k] = true; gapEls[k].classList.add('luecke--richtig'); }
         else gapEls[k].classList.add('luecke--falsch');
       });
-      if (res.score === 1) return done(false);
+      if (res.score === 1) { done(false); F.reveal(); return; }
       var wrong = res.gaps.filter(function (x) { return !x; }).length;
-      F.say('<b>' + wrong + (wrong === 1 ? ' Lücke ist' : ' Lücken sind') + ' noch falsch.</b>', 'fehler');
+      F.say('<b>' + wrong + (wrong === 1 ? ' Lücke ist' : ' Lücken sind') + ' noch falsch.</b> Lies den Satz rund um die rote Lücke noch einmal.', 'fehler');
       F.buttons([btn('Falsche leeren', 'knopf--primaer', retry), btn('Lösung zeigen', 'knopf--leise', solve)]);
+      F.reveal();
     }
     function retry() {
       gaps.forEach(function (g, k) { if (!locked[k]) release(k); });
@@ -440,11 +519,12 @@
         locked[k] = true;
       });
       done(true);
+      F.reveal();
     }
     function done(solved) {
       finished = true;
       setActive(-1);
-      F.say((solved ? '<p>Die gelb markierten Wörter waren noch falsch. Lies den Text einmal ganz durch.</p>' : '') + '<p class="lob">' + lobText(first) + '</p>', 'gut');
+      F.say((solved ? '<p>Die gelb markierten Wörter waren noch falsch. Lies den Text einmal ganz durch.</p>' : '') + '<p class="lob">' + lobText(first, solved) + '</p>', 'gut');
       F.buttons([btn('Nochmal üben', 'knopf--leise', function () { ctx.redo(); })]);
       F.finish(first);
     }
@@ -475,7 +555,7 @@
     function feedback(ok) {
       answered = true;
       fb.className = 'frage__rueck ' + (ok ? 'frage__rueck--gut' : 'frage__rueck--fehler');
-      fb.innerHTML = '<b>' + (ok ? 'Richtig!' : 'Nicht ganz.') + '</b> ' + W.esc(q.why || '');
+      fb.innerHTML = '<b>' + (ok ? 'Richtig!' : 'Nicht ganz.') + '</b> ' + W.esc(X.whyText(q));
       onAnswered(ok);
     }
 
@@ -497,8 +577,7 @@
       });
     } else if (q.kind === 'multi') {
       var chosen = {};
-      var idx = q.options.map(function (o, i) { return i; });
-      idx.forEach(function (i) {
+      q.options.forEach(function (o, i) {
         var b = h('button', { class: 'option option--multi', type: 'button', 'aria-pressed': 'false' }, h('span', { class: 'option__box', 'aria-hidden': 'true' }), q.options[i]);
         b.addEventListener('click', function () {
           if (answered) return;
@@ -556,7 +635,7 @@
      ========================================================= */
   X.quiz = function (ex, ctx) {
     var F = frame(ex, ctx);
-    var i = 0, right = 0, firsts = [];
+    var i = 0, right = 0;
     var stage = h('div', { class: 'quizbuehne' });
     var zaehler = h('p', { class: 'quiz__zaehler' });
     F.body.appendChild(zaehler);
@@ -569,11 +648,11 @@
       F.buttons([]);
       stage.appendChild(X.question(ex.questions[i], function (ok) {
         if (ok) right++;
-        firsts.push(ok);
         var last = i === ex.questions.length - 1;
         F.buttons([btn(last ? 'Auswertung' : 'Nächste Frage', 'knopf--primaer', function () {
-          if (last) end(); else { i++; show(); }
+          if (last) end(); else { i++; show(); stage.scrollIntoView({ block: 'nearest', behavior: smooth() }); }
         })]);
+        F.reveal();
       }));
     }
     function end() {
@@ -583,6 +662,7 @@
       F.say('<p><b>' + right + ' von ' + ex.questions.length + ' richtig.</b></p><p class="lob">' + lobText(score) + '</p>', score >= 0.6 ? 'gut' : 'fehler');
       F.buttons([btn('Nochmal üben', 'knopf--leise', function () { ctx.redo(); })]);
       F.finish(score);
+      F.reveal();
     }
     show();
     return F.el;
@@ -593,10 +673,9 @@
      ========================================================= */
   X.chain = function (ex, ctx) {
     var F = frame(ex, ctx);
-    var results = {}; // scenarioId -> [bool]
+    var results = {};
     var tabs = h('div', { class: 'szenarien', role: 'tablist' });
     var stage = h('div', { class: 'szenario' });
-    var current = null;
 
     ex.scenarios.forEach(function (sc, k) {
       var t = h('button', { class: 'szenarien__tab', type: 'button', role: 'tab' }, 'Fall ' + (k + 1));
@@ -605,13 +684,13 @@
       tabs.appendChild(t);
     });
 
-    function badge(dir) { return h('span', { class: 'wirk wirk--' + (dir === '+' ? 'plus' : 'minus') }, dir === '+' ? '+' : '−'); }
+    function badge(dir) { return h('span', { class: 'wirk wirk--' + (dir === '+' ? 'plus' : 'minus'), 'aria-label': dir === '+' ? 'mehr' : 'weniger' }, dir === '+' ? '+' : '−'); }
 
     function open(sc, tab) {
-      current = sc;
       Array.prototype.forEach.call(tabs.children, function (t) { t.setAttribute('aria-selected', t === tab ? 'true' : 'false'); });
       stage.innerHTML = '';
       F.say('');
+      F.buttons([]);
       var netz = h('div', { class: 'wirkkette' },
         h('div', { class: 'wirkkette__glied wirkkette__glied--start' }, sc.start.who, badge(sc.start.dir)));
       stage.appendChild(h('p', { class: 'szenario__titel' }, sc.title));
@@ -624,26 +703,25 @@
         askBox.innerHTML = '';
         if (step >= sc.steps.length) return finishScenario();
         var st = sc.steps[step];
-        var fb = h('p', { class: 'frage__rueck', 'aria-live': 'polite' });
         var plus = h('button', { class: 'option option--plus', type: 'button' }, h('b', null, '+'), ' mehr');
         var minus = h('button', { class: 'option option--minus', type: 'button' }, h('b', null, '−'), ' weniger');
-        function pick(dir, b) {
-          plus.disabled = minus.disabled = true;
+        function pick(dir) {
           var ok = dir === st.answer;
           answers.push(ok);
-          (st.answer === '+' ? plus : minus).classList.add('option--richtig');
-          if (!ok) b.classList.add('option--falsch');
-          fb.className = 'frage__rueck ' + (ok ? 'frage__rueck--gut' : 'frage__rueck--fehler');
-          fb.innerHTML = '<b>' + (ok ? 'Genau.' : 'Andersherum.') + '</b> ' + W.esc(st.why);
+          askBox.innerHTML = '';
+          var neu = h('div', { class: 'wirkkette__glied wirkkette__glied--neu' }, st.who, badge(st.answer));
           netz.appendChild(h('div', { class: 'wirkkette__pfeil', 'aria-hidden': 'true' }));
-          netz.appendChild(h('div', { class: 'wirkkette__glied' }, st.who, badge(st.answer)));
+          netz.appendChild(neu);
+          askBox.appendChild(h('p', { class: 'frage__rueck ' + (ok ? 'frage__rueck--gut' : 'frage__rueck--fehler'), 'aria-live': 'polite' },
+            h('b', null, ok ? 'Genau. ' : 'Andersherum. '), st.why));
           askBox.appendChild(h('div', { class: 'uebung__aktionen' }, btn(step === sc.steps.length - 1 ? 'Fall abschließen' : 'Weiter', 'knopf--primaer', function () { step++; ask(); })));
+          setTimeout(function () { askBox.scrollIntoView({ block: 'nearest', behavior: smooth() }); }, 40);
         }
-        plus.addEventListener('click', function () { pick('+', plus); });
-        minus.addEventListener('click', function () { pick('-', minus); });
-        askBox.appendChild(h('p', { class: 'frage__text' }, 'Was passiert mit: ', h('b', null, st.who), '?'));
+        plus.addEventListener('click', function () { pick('+'); });
+        minus.addEventListener('click', function () { pick('-'); });
+        askBox.appendChild(h('p', { class: 'frage__text' }, 'Was passiert mit ' + (st.frage || st.who) + '?'));
         askBox.appendChild(h('div', { class: 'optionen optionen--zwei' }, plus, minus));
-        askBox.appendChild(fb);
+        setTimeout(function () { askBox.scrollIntoView({ block: 'nearest', behavior: smooth() }); }, 40);
       }
       function finishScenario() {
         if (!results[sc.id]) results[sc.id] = answers;
@@ -652,15 +730,16 @@
         askBox.innerHTML = '';
         var remaining = ex.scenarios.filter(function (s) { return !results[s.id]; });
         F.say('<b>' + right + ' von ' + answers.length + ' Vorhersagen richtig.</b> ' +
-          (remaining.length ? 'Weiter mit dem nächsten Fall.' : 'Alle Fälle geschafft. Das biologische Gleichgewicht pendelt sich nach jeder Störung wieder ein.'), right === answers.length ? 'gut' : '');
+          (remaining.length ? 'Weiter mit dem nächsten Fall.' : 'Alle Fälle geschafft. Nach natürlichen Schwankungen pendelt sich das Gleichgewicht wieder ein. Dauerhafte Eingriffe des Menschen, wie Pestizide, können es aber auf Dauer verschieben.'), right === answers.length ? 'gut' : '');
         if (remaining.length) {
-          F.buttons([btn('Nächster Fall', 'knopf--primaer', function () { var nx = remaining[0]; open(nx, nx._tab); F.buttons([]); })]);
+          F.buttons([btn('Nächster Fall', 'knopf--primaer', function () { var nx = remaining[0]; open(nx, nx._tab); F.el.scrollIntoView({ block: 'start', behavior: smooth() }); })]);
         } else {
           var all = [].concat.apply([], ex.scenarios.map(function (s) { return results[s.id]; }));
           var score = all.filter(Boolean).length / all.length;
           F.buttons([btn('Nochmal üben', 'knopf--leise', function () { ctx.redo(); })]);
           F.finish(score);
         }
+        F.reveal();
       }
       ask();
     }
@@ -674,6 +753,12 @@
   /* =========================================================
      Blatt-Detektiv (keywalk)
      ========================================================= */
+  var KURZ = {
+    zusammengesetzt: 'zusammengesetzt', einfach: 'einfach', gefingert: 'gefingert', gefiedert: 'gefiedert',
+    gelappt: 'gelappt', ungelappt: 'ohne Lappen', 'lappen-rund': 'Lappen rund', 'lappen-spitz': 'Lappen spitz',
+    ganzrandig: 'Rand glatt', gesaegt: 'Rand gesägt', herz: 'rundlich, herzförmig', nichtherz: 'länger als breit',
+    raute: 'rautenförmig', parallel: 'Adern parallel'
+  };
   X.keywalk = function (ex, ctx) {
     var F = frame(ex, ctx);
     var trees = W.shuffle(Object.keys(W.TREES)).slice(0, ex.rounds || 5);
@@ -683,7 +768,7 @@
 
     function play() {
       var tree = trees[round];
-      var path = [], at = W.KEY_START;
+      var path = [], at = W.KEY_START, firstTry = true;
       stage.innerHTML = '';
       F.say('');
       F.buttons([]);
@@ -695,11 +780,14 @@
       stage.appendChild(fund);
       stage.appendChild(h('div', { class: 'detektiv__rechts' }, spur, frage));
 
-      function render() {
+      function drawSpur() {
         spur.innerHTML = '';
         path.forEach(function (p) {
-          spur.appendChild(h('li', null, p.nr + p.c));
+          spur.appendChild(h('li', null, h('b', null, String(p.nr)), ' ' + KURZ[W.KEY[p.q][p.c].bild]));
         });
+      }
+      function render() {
+        drawSpur();
         frage.innerHTML = '';
         var node = W.KEY[at];
         frage.appendChild(h('p', { class: 'detektiv__nr' }, 'Frage ' + node.nr));
@@ -729,39 +817,52 @@
       }
       function result(id) {
         var ok = id === tree;
-        if (ok) right++;
+        if (ok && firstTry) right++;
         var t = W.TREES[tree];
+        drawSpur();
         frage.innerHTML = '';
-        spur.innerHTML = '';
-        path.forEach(function (p) { spur.appendChild(h('li', null, p.nr + p.c)); });
-        var msg;
+        var last = round === trees.length - 1;
+        var nextBtn = btn(last ? 'Auswertung' : 'Nächstes Fundstück', 'knopf--primaer', function () {
+          if (last) end(); else { round++; play(); F.el.scrollIntoView({ block: 'start', behavior: smooth() }); }
+        });
         if (ok) {
-          msg = '<p class="detektiv__ergebnis">' + W.esc(t.name) + '</p><p><b>Richtig bestimmt!</b> ' + W.esc(t.merkmale) + '. Früchte: ' + W.esc(t.frucht) + '.</p>';
+          frage.innerHTML = '<p class="detektiv__ergebnis">' + W.esc(t.name) + '</p><p><b>' + (firstTry ? 'Richtig bestimmt!' : 'Jetzt stimmt’s!') + '</b> ' + W.esc(t.merkmale) + '. Früchte: ' + W.esc(t.frucht) + '.</p>';
+          F.say('');
+          F.buttons([nextBtn]);
         } else {
+          firstTry = false;
           var good = W.logic.pathTo(W.KEY, W.KEY_START, tree);
-          var wrongAt = null;
+          var wrongAt = 0;
           for (var k = 0; k < path.length; k++) {
             if (!good[k] || good[k].c !== path[k].c) { wrongAt = k; break; }
           }
-          var g = good[wrongAt], node = W.KEY[g.q];
-          msg = '<p>Dein Ergebnis: <b>' + W.esc(W.TREES[id].name) + '</b>. Das Fundstück ist aber eine <b>' + W.esc(t.name) + '</b>.</p>' +
-            '<p>Bei Frage ' + node.nr + ' („' + W.esc(node.frage) + '“) passt <b>' + g.c + '</b>: ' + W.esc(node[g.c].text) + '</p>';
+          var node = W.KEY[good[wrongAt].q];
+          frage.innerHTML = '<p>Dein Ergebnis: <b>' + W.esc(W.TREES[id].name) + '</b>. Das passt aber nicht zum Fundstück.</p>' +
+            '<p>Du bist bei <b>Frage ' + node.nr + '</b> falsch abgebogen. Schau dir das Blatt dort noch einmal genau an.</p>';
+          F.say('');
+          var again = btn('Nochmal ab Frage ' + node.nr, 'knopf--primaer', function () {
+            path = path.slice(0, wrongAt);
+            at = good[wrongAt].q;
+            render();
+          });
+          var show = btn('Lösung zeigen', 'knopf--leise', function () {
+            frage.innerHTML = '<p>Das Fundstück ist eine <b>' + W.esc(t.name) + '</b>. Bei Frage ' + node.nr + ' („' + W.esc(node.frage) + '“) passt <b>' + good[wrongAt].c + '</b>: ' + W.esc(node[good[wrongAt].c].text) + '</p>';
+            F.buttons([nextBtn]);
+          });
+          frage.appendChild(h('div', { class: 'uebung__aktionen' }, again));
+          F.buttons([show, nextBtn]);
         }
-        frage.innerHTML = msg;
-        F.say(ok ? '' : 'Schau dir das Fundstück noch einmal genau an.', ok ? 'gut' : 'fehler');
-        var last = round === trees.length - 1;
-        F.buttons([btn(last ? 'Auswertung' : 'Nächstes Fundstück', 'knopf--primaer', function () {
-          if (last) end(); else { round++; play(); }
-        })]);
+        F.reveal();
       }
       render();
     }
     function end() {
       var score = right / trees.length;
       stage.innerHTML = '';
-      F.say('<p><b>' + right + ' von ' + trees.length + ' Blättern richtig bestimmt.</b></p><p class="lob">' + lobText(score) + '</p>', score >= 0.6 ? 'gut' : 'fehler');
+      F.say('<p><b>' + right + ' von ' + trees.length + ' Blättern im ersten Anlauf richtig bestimmt.</b></p><p class="lob">' + lobText(score) + '</p>', score >= 0.6 ? 'gut' : 'fehler');
       F.buttons([btn('Neue Fundstücke', 'knopf--leise', function () { ctx.redo(); })]);
       F.finish(score);
+      F.reveal();
     }
     play();
     return F.el;
@@ -770,6 +871,7 @@
   /* =========================================================
      Erklär-Training
      ========================================================= */
+  var MIN_TEXT = 25;
   X.explain = function (pr, ctx) {
     var st = W.state.explainState(pr.id);
     var opInfo = h('p', { class: 'operator__info', hidden: true }, W.OPERATOREN[pr.op] || '');
@@ -778,12 +880,30 @@
       opInfo.hidden = !opInfo.hidden;
       opBtn.setAttribute('aria-expanded', opInfo.hidden ? 'false' : 'true');
     });
-    var ta = h('textarea', { class: 'erklaer__feld', rows: '5', placeholder: 'Schreib deine Antwort hier hin, oder sag sie laut und schreib sie auf einen Zettel.', 'aria-label': 'Deine Antwort' });
+    var ta = h('textarea', {
+      class: 'erklaer__feld', rows: '5', 'aria-label': 'Deine Antwort',
+      placeholder: pr.papier ? 'Zeichne dein Schema auf Papier. Hier kannst du dir Notizen machen.' : 'Schreib deine Antwort in ganzen Sätzen hier hin.'
+    });
     ta.value = st.text || '';
     var timer;
+    var hint = h('p', { class: 'erklaer__hinweis' });
+    var show = h('button', { class: 'knopf knopf--primaer', type: 'button' }, 'Musterlösung zeigen');
+    var papier = h('button', { class: 'knopf knopf--leise', type: 'button' }, pr.papier ? 'Meine Skizze ist fertig' : 'Ich habe auf Papier geantwortet');
+    function geschrieben() { return ta.value.trim().length >= MIN_TEXT || W.state.explainState(pr.id).papier; }
+    function gate() {
+      var ok = geschrieben();
+      show.disabled = !ok;
+      hint.textContent = ok ? '' : (pr.papier ? 'Erst zeichnen, dann vergleichen.' : 'Erst selbst antworten (mindestens einen Satz), dann vergleichen.');
+    }
     ta.addEventListener('input', function () {
       clearTimeout(timer);
       timer = setTimeout(function () { W.state.saveExplain(pr.id, { text: ta.value }); }, 400);
+      gate();
+    });
+    papier.addEventListener('click', function () {
+      W.state.saveExplain(pr.id, { papier: true });
+      papier.hidden = true;
+      gate();
     });
     var hilfe = h('details', { class: 'hilfe' }, h('summary', null, 'Satzanfänge als Hilfe'),
       h('ul', null, pr.starter.map(function (s) { return h('li', null, s); })));
@@ -796,10 +916,9 @@
       cb.addEventListener('change', function () {
         var cur = W.state.explainState(pr.id);
         var pts = (cur.points || []).slice();
-        var before = !!cur.earned && cur.earned[i];
         pts[i] = cb.checked;
         var earned = (cur.earned || []).slice();
-        if (cb.checked && !before) { earned[i] = true; W.state.addAcorns(2); W.toast('+2 Eicheln', 'eichel'); }
+        if (cb.checked && !earned[i] && geschrieben()) { earned[i] = true; W.state.addAcorns(2); W.toast('+2 Eicheln', 'eichel'); }
         W.state.saveExplain(pr.id, { points: pts, earned: earned });
         sumUp();
       });
@@ -813,31 +932,51 @@
     }
     var modelBox = h('div', { class: 'loesung__text' });
     modelBox.innerHTML = pr.model;
+    var neu = h('button', { class: 'knopf knopf--leise', type: 'button' }, 'Nochmal ohne Lösung üben');
+    neu.addEventListener('click', function () {
+      ta.value = '';
+      checks.forEach(function (li) { li.querySelector('input').checked = false; });
+      W.state.saveExplain(pr.id, { text: '', points: [], papier: false });
+      loesung.hidden = true;
+      show.hidden = false;
+      papier.hidden = false;
+      gate();
+      ta.focus();
+    });
     loesung.appendChild(h('p', { class: 'loesung__titel' }, 'Musterlösung'));
     loesung.appendChild(modelBox);
     loesung.appendChild(h('p', { class: 'loesung__titel' }, 'Hake ab, was in deiner Antwort vorkommt:'));
     loesung.appendChild(h('ul', { class: 'checkliste' }, checks));
     loesung.appendChild(fazit);
+    loesung.appendChild(h('div', { class: 'uebung__aktionen' }, neu));
 
-    var show = h('button', { class: 'knopf knopf--primaer', type: 'button' }, 'Musterlösung zeigen');
     show.addEventListener('click', function () {
+      if (!geschrieben()) return;
+      W.state.saveExplain(pr.id, { text: ta.value });
       loesung.hidden = false;
       show.hidden = true;
+      papier.hidden = true;
+      sumUp();
+      setTimeout(function () { modelBox.scrollIntoView({ block: 'nearest', behavior: smooth() }); }, 40);
       if (!W.state.explainState(pr.id).shown) {
         W.state.saveExplain(pr.id, { shown: true });
         W.state.save();
         if (ctx && ctx.onDone) ctx.onDone(pr.id, 1);
       }
-      sumUp();
     });
-    if (st.shown) { loesung.hidden = false; show.hidden = true; sumUp(); }
+    if (st.shown && (st.text || st.papier || (st.points && st.points.some(Boolean)))) {
+      loesung.hidden = false; show.hidden = true; papier.hidden = true; sumUp();
+    }
+    if (st.papier) papier.hidden = true;
+    gate();
 
     return h('article', { class: 'erklaer', id: 'ex-' + pr.id },
       h('div', { class: 'erklaer__kopf' }, opBtn),
       opInfo,
       h('p', { class: 'erklaer__auftrag' }, pr.task),
       hilfe, ta,
-      h('div', { class: 'uebung__aktionen' }, show),
+      h('div', { class: 'uebung__aktionen' }, show, papier),
+      hint,
       loesung);
   };
 

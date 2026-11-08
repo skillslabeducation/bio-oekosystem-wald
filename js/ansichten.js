@@ -47,7 +47,7 @@
       var p = W.state.stationProgress(st);
       var pos = POS[st.id];
       var sign = h('button', {
-        class: 'schild' + (p.stamp ? ' schild--fertig' : '') + (next && next.id === st.id ? ' schild--naechstes' : ''),
+        class: 'schild' + (p.stamp ? ' schild--fertig' : '') + (next && next.id === st.id ? ' schild--naechstes' : '') + (pos[0] > 75 ? ' schild--rechts' : pos[0] < 20 ? ' schild--links' : ''),
         type: 'button',
         style: { left: pos[0] + '%', top: pos[1] + '%', animationDelay: (1.7 + i * 0.08) + 's' },
         'aria-label': st.title + (p.stamp ? ', Stempel erhalten' : ', ' + p.done + ' von ' + p.total + ' Übungen')
@@ -58,7 +58,7 @@
       sign.addEventListener('click', function () { go('#/station/' + st.id); });
       map.appendChild(sign);
     });
-    var hoch = h('button', { class: 'schild schild--pruefung', type: 'button', style: { left: '89%', top: '62%', animationDelay: '2.3s' }, 'aria-label': 'Försterprüfung am Hochsitz' },
+    var hoch = h('button', { class: 'schild schild--pruefung schild--rechts', type: 'button', style: { left: '89%', top: '62%', animationDelay: '2.3s' }, 'aria-label': 'Försterprüfung am Hochsitz' },
       h('span', { class: 'schild__brett' }, svg(A.icon('diplom', 'schild__ico')), h('span', { class: 'schild__name' }, 'Prüfung')),
       h('span', { class: 'schild__pfahl', 'aria-hidden': 'true' }));
     hoch.addEventListener('click', function () { go('#/pruefung'); });
@@ -85,6 +85,11 @@
 
     root.appendChild(intro);
     root.appendChild(map);
+    if (V.pendingFeier) {
+      var pf = station(V.pendingFeier);
+      V.pendingFeier = null;
+      if (pf) setTimeout(function () { feiern(pf, true); }, map.classList.contains('karte--waechst') ? 2400 : 500);
+    }
     root.appendChild(h('div', { class: 'seite seite--breit' },
       h('h2', { class: 'abschnitt' }, 'Die Stationen'), list, extra));
   };
@@ -122,7 +127,17 @@
       // Reiter-Zähler aktualisieren
       nav.children[1].querySelector('small').textContent = now.done + '/' + now.total;
       nav.children[2].querySelector('small').textContent = now.explDone + '/' + now.explTotal;
-      if (now.stamp && !before) { before = true; feiern(st); }
+      if (now.stamp && !before) {
+        before = true;
+        if (tab === 'erklaeren') {
+          // Nicht über die Musterlösung legen: Der Stempel wartet auf der Karte.
+          V.pendingFeier = st.id;
+          body.insertBefore(h('aside', { class: 'stempel-hinweis', role: 'status' }, stempel(st, true),
+            h('p', null, h('b', null, 'Stempel verdient! '), 'Lies in Ruhe die Musterlösung. Dein Stempel wartet auf der Karte.')), body.firstChild);
+        } else {
+          setTimeout(function () { feiern(st); }, 700);
+        }
+      }
     }
 
     if (tab === 'entdecken') {
@@ -183,23 +198,31 @@
   }
 
   /* Station geschafft: Stempel-Moment */
-  function feiern(st) {
+  function rangText(stamps) {
+    var rank = W.logic.rankFor(stamps);
+    var next = W.logic.RANKS.filter(function (r) { return r.min > stamps; })[0];
+    return h('p', { class: 'feier__rang' }, 'Dein Rang: ', h('b', null, rank.name), ' (' + rank.layer + ')',
+      next ? h('span', { class: 'feier__naechster' }, 'Noch ' + (next.min - stamps) + (next.min - stamps === 1 ? ' Stempel' : ' Stempel') + ' bis ' + next.name + '.') : null);
+  }
+  V.rangText = rangText;
+
+  function feiern(st, aufKarte) {
     var layer = h('div', { class: 'feier', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Station geschafft' });
     var stamp = stempel(st);
     stamp.classList.add('stempel--gross');
     var stamps = W.state.stamps();
-    var rank = W.logic.rankFor(stamps);
-    var ok = h('button', { class: 'knopf knopf--primaer', type: 'button' }, 'Zurück zur Karte');
-    var stay = h('button', { class: 'knopf knopf--leise', type: 'button' }, 'Hierbleiben');
+    var ok = h('button', { class: 'knopf knopf--primaer', type: 'button' }, aufKarte ? 'Super!' : 'Weiter lernen');
+    var map = aufKarte ? null : h('button', { class: 'knopf knopf--leise', type: 'button' }, 'Zur Karte');
     layer.appendChild(h('div', { class: 'feier__karte' },
       h('p', { class: 'feier__titel' }, 'Station geschafft!'),
       stamp,
       h('p', null, 'Der Stempel ist in deinem Feldbuch. Du hast jetzt ' + stamps + ' von ' + W.stations.length + ' Stempeln.'),
-      h('p', { class: 'feier__rang' }, 'Dein Rang: ', h('b', null, rank.name), ' (' + rank.layer + ')'),
-      h('div', { class: 'feier__knoepfe' }, ok, stay)));
+      rangText(stamps),
+      h('div', { class: 'feier__knoepfe' }, ok, map)));
     function close() { layer.remove(); }
-    ok.addEventListener('click', function () { close(); go('#/'); });
-    stay.addEventListener('click', close);
+    ok.addEventListener('click', close);
+    if (map) map.addEventListener('click', function () { close(); go('#/'); });
+    layer.addEventListener('click', function (e) { if (e.target === layer) close(); });
     document.body.appendChild(layer);
     ok.focus();
   }
@@ -260,36 +283,42 @@
           var last = i === qs.length - 1;
           foot.appendChild(h('button', { class: 'knopf knopf--primaer knopf--gross', type: 'button', onclick: function () { if (last) end(); else { i++; show(); window.scrollTo(0, 0); } } }, last ? 'Ergebnis ansehen' : 'Nächste Frage'));
           foot.lastChild.focus({ preventScroll: true });
+          setTimeout(function () { foot.scrollIntoView({ block: 'nearest', behavior: W.reducedMotion() ? 'auto' : 'smooth' }); }, 40);
         }));
       }
       function end() {
         var pct = right / qs.length;
         var run = { date: new Date().toISOString(), score: right, n: qs.length, only: only || null };
         W.state.recordQuiz(run);
-        var gain = W.state.addAcorns(right * 2);
-        if (gain) W.toast('+' + gain + ' Eicheln', 'eichel');
+        W.state.addAcorns(right * 2);
         var earned = !only && pct >= 0.8;
-        if (earned && !W.state.data.diplom) { W.state.data.diplom = { date: new Date().toISOString(), score: right, n: qs.length }; W.state.save(); }
+        var neuesDiplom = earned && !W.state.data.diplom;
+        if (earned) { W.state.data.diplom = { date: new Date().toISOString(), score: Math.max(right, (W.state.data.diplom || {}).score || 0), n: qs.length }; W.state.save(); }
+        var fehlt = Math.ceil(qs.length * 0.8) - right;
         seite.innerHTML = '';
         seite.appendChild(h('header', { class: 'station-kopf' }, svg(A.icon('diplom', 'station-kopf__ico')),
           h('div', null, h('h1', null, right + ' von ' + qs.length + ' richtig'),
-            h('p', { class: 'station-kopf__ziel' }, earned ? 'Bestanden! Das Walddiplom gehört dir.' : only ? 'Themen-Training beendet.' : pct >= 0.6 ? 'Gut! Für das Diplom fehlen noch ' + (Math.ceil(qs.length * 0.8) - right) + ' richtige Antworten.' : 'Wiederhole die Stationen unten, dann klappt es beim nächsten Mal.'))));
+            h('p', { class: 'station-kopf__ziel' }, h('b', null, '+' + right * 2 + ' Eicheln. '),
+              earned ? 'Bestanden! Das Walddiplom gehört dir.' : only ? 'Themen-Training beendet.'
+                : fehlt === 1 ? 'Nur eine einzige Antwort hat zum Diplom gefehlt! Gleich nochmal?'
+                  : pct >= 0.6 ? 'Gut! Für das Diplom fehlen noch ' + fehlt + ' richtige Antworten.'
+                    : 'Wiederhole die Stationen unten, dann klappt es beim nächsten Mal.'))));
+        if (earned) seite.appendChild(diplom(W.state.data.diplom));
         var rows = h('ul', { class: 'auswertung' });
         W.stations.map(function (s) { return s.id; }).filter(function (sid) { return by[sid]; }).forEach(function (sid) {
           var b = by[sid], st = station(sid), ok = b.r === b.n;
           rows.appendChild(h('li', { class: ok ? 'auswertung--gut' : '' },
             h('span', null, st.short), h('span', { class: 'auswertung__wert' }, b.r + '/' + b.n),
-            ok ? h('span', { class: 'auswertung__tipp' }, 'sitzt') : h('a', { href: '#/station/' + sid + '/ueben' }, 'nochmal üben')));
+            ok ? h('span', { class: 'auswertung__tipp' }, 'sitzt') : h('a', { class: 'knopf knopf--klein', href: '#/station/' + sid + '/ueben' }, 'Nochmal üben')));
         });
         seite.appendChild(h('section', { class: 'lern' }, h('h2', null, 'Nach Stationen'), rows));
         if (wrong.length) {
           seite.appendChild(h('section', { class: 'lern' }, h('h2', null, 'Das lohnt sich nachzulesen'),
             h('ul', { class: 'fehlerliste' }, wrong.map(function (q) {
-              var a = q.kind === 'tf' ? (q.answer ? 'Stimmt' : 'Stimmt nicht') : q.kind === 'multi' ? q.answer.map(function (k) { return q.options[k]; }).join(', ') : q.kind === 'binary' ? q.labels[q.answer] : q.options[q.answer];
-              return h('li', null, h('p', null, q.q), h('p', null, h('b', null, 'Richtig: '), a, '. ', q.why));
+              return h('li', null, h('p', null, q.q), h('p', null, h('b', null, 'Richtig: '), W.ex.answerText(q).replace(/\.$/, '') + '. ', W.ex.whyText(q)));
             }))));
         }
-        if (earned) seite.appendChild(diplom(W.state.data.diplom));
+        if (neuesDiplom) setTimeout(function () { diplomFeier(); }, 300);
         seite.appendChild(h('div', { class: 'weiter' },
           h('button', { class: 'knopf knopf--primaer knopf--gross', type: 'button', onclick: function () { run(only); } }, 'Neue Runde'),
           h('a', { class: 'knopf knopf--leise', href: '#/' }, 'Zur Karte')));
@@ -299,6 +328,28 @@
     }
     start();
   };
+
+  /* Großer Moment: das Diplom zuerst, mit fallenden Blättern */
+  function diplomFeier() {
+    var layer = h('div', { class: 'feier feier--diplom', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Walddiplom erhalten' });
+    var regen = h('div', { class: 'blattregen', 'aria-hidden': 'true' });
+    if (!W.reducedMotion()) {
+      for (var k = 0; k < 18; k++) {
+        var leaf = svg(A.leaf(A.LEAF_IDS[k % A.LEAF_IDS.length]));
+        leaf.style.left = (k * 5.6 + Math.random() * 4) + '%';
+        leaf.style.animationDelay = (Math.random() * 1.6) + 's';
+        leaf.style.animationDuration = (2.6 + Math.random() * 1.8) + 's';
+        regen.appendChild(leaf);
+      }
+    }
+    var ok = h('button', { class: 'knopf knopf--primaer knopf--gross', type: 'button' }, 'Juhu!');
+    var karte = h('div', { class: 'feier__karte feier__karte--diplom' }, diplom(W.state.data.diplom), h('div', { class: 'feier__knoepfe' }, ok));
+    layer.appendChild(regen);
+    layer.appendChild(karte);
+    ok.addEventListener('click', function () { layer.remove(); });
+    document.body.appendChild(layer);
+    ok.focus();
+  }
 
   function diplom(info) {
     var name = W.state.data.name || '';
@@ -328,9 +379,10 @@
       var p = W.state.stationProgress(st);
       stamps.appendChild(p.stamp ? stempel(st) : h('a', { class: 'stempel stempel--leer', href: '#/station/' + st.id }, h('span', { class: 'stempel__text' }, st.short)));
     });
-    var rank = W.logic.rankFor(W.state.stamps());
-    seite.appendChild(h('section', { class: 'lern' }, h('h2', null, 'Stempel'), stamps,
-      h('p', null, 'Rang: ', h('b', null, rank.name), ' (' + rank.layer + ') · ', W.state.data.acorns + ' Eicheln gesammelt')));
+    seite.appendChild(h('section', { class: 'lern', id: 'rang' }, h('h2', null, 'Stempel und Rang'), stamps,
+      rangText(W.state.stamps()),
+      h('p', null, 'Dein Rang wächst wie ein Baum durch die Stockwerke: ', h('b', null, 'Keimling'), ' (Moosschicht) → ', h('b', null, 'Setzling'), ' (Krautschicht, ab 2 Stempeln) → ', h('b', null, 'Jungbaum'), ' (Strauchschicht, ab 4) → ', h('b', null, 'Waldriese'), ' (Baumschicht, alle 6).'),
+      h('p', null, 'Gesammelt: ', h('b', null, W.state.data.acorns + ' Eicheln'), '. Eicheln gibt es für jede Übung, jeden abgehakten Punkt beim Erklären und jede richtige Prüfungsfrage.')));
     if (d.diplom) seite.appendChild(diplom(d.diplom));
 
     seite.appendChild(h('div', { class: 'uebung__aktionen nicht-drucken' },
@@ -376,7 +428,10 @@
     var input = h('input', { type: 'text', class: 'eingabe', maxlength: '30', autocomplete: 'off', 'aria-label': 'Dein Vorname', placeholder: 'Vorname' });
     input.value = d.name || '';
     var layer = h('div', { class: 'feier', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'name-titel' });
-    function ok() { W.state.setName(input.value); layer.remove(); W.app.render(); }
+    function ok() {
+      if (!input.value.trim()) { skip(); return; }
+      W.state.setName(input.value); layer.remove(); W.app.render();
+    }
     function skip() { W.store.set('expedition-wald-ohne-name', true); layer.remove(); }
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') ok(); });
     layer.appendChild(h('div', { class: 'feier__karte feier__karte--name' },

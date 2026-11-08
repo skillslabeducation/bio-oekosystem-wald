@@ -53,6 +53,10 @@
       },
       { t: 'widget', w: 'layers' },
       {
+        t: 'fact', h: 'Fachwort: Ökosystem',
+        html: 'Der Wald ist ein <b>Ökosystem</b>. Das ist ein Lebensraum zusammen mit allen Lebewesen, die dort leben und voneinander abhängen (der <b>Lebensgemeinschaft</b>).'
+      },
+      {
         t: 'merke',
         html: '<b>Von unten nach oben:</b> Wurzelschicht, Moosschicht (bis 20 cm), Krautschicht (bis 1,5 m), Strauchschicht (bis 5 m), Baumschicht (bis 40 m).<br><span class="eselsbruecke">Eselsbrücke: <b>W</b>ilde <b>M</b>äuse <b>k</b>auen <b>s</b>üße <b>B</b>eeren.</span>'
       },
@@ -69,7 +73,7 @@
       },
       {
         t: 'fact', h: 'Wusstest du?',
-        html: '<b>Baumstumpf:</b> In 10 bis 15 Jahren verwandelt sich ein Baumstumpf in Humus. Daran arbeiten unzählige Zersetzer.<br><b>Ameisenhügel:</b> Die Kleine Rote Waldameise frisst vor allem Forstschädlinge. Darum stehen ihre Hügel unter Schutz.'
+        html: '<b>Baumstumpf:</b> In 10 bis 15 Jahren verwandelt sich ein Baumstumpf in Humus, also dunkle, fruchtbare Erde aus zersetzten Resten. Daran arbeiten unzählige Zersetzer.<br><b>Ameisenhügel:</b> Die Kleine Rote Waldameise frisst vor allem Forstschädlinge. Darum stehen ihre Hügel unter Schutz.'
       }
     ],
     practice: [
@@ -87,7 +91,7 @@
       },
       {
         id: 'sw-pflanzen', type: 'sort', h: 'Was wächst wo?',
-        task: 'Ordne jede Pflanze ihrem Stockwerk zu. Tippe erst ein Kärtchen an, dann das Stockwerk. Du kannst die Kärtchen auch ziehen.',
+        task: 'Ordne jede Pflanze ihrem Stockwerk zu. Tippe erst ein Kärtchen an, dann das Stockwerk. Oder halte ein Kärtchen kurz gedrückt und zieh es hinüber.',
         buckets: [
           { id: 'wurzel', label: 'Wurzelschicht' },
           { id: 'moos', label: 'Moosschicht' },
@@ -104,8 +108,8 @@
           { id: 'p6', label: 'Holunder', bucket: 'strauch', why: 'Holunder ist ein Strauch (bis 5 m).' },
           { id: 'p7', label: 'Hasel', bucket: 'strauch', why: 'Die Hasel ist ein typischer Strauch.' },
           { id: 'p8', label: 'Weißdorn', bucket: 'strauch', why: 'Weißdorn ist ein typischer Strauch.' },
-          { id: 'p9', label: 'Buche', bucket: 'baum', why: 'Die Krone einer ausgewachsenen Buche gehört zur Baumschicht.' },
-          { id: 'p10', label: 'Fichte', bucket: 'baum', why: 'Die Fichte ist ein hoher Baum der Baumschicht.' }
+          { id: 'p9', label: 'Buche (ausgewachsen)', bucket: 'baum', why: 'Die Krone einer ausgewachsenen Buche gehört zur Baumschicht.' },
+          { id: 'p10', label: 'Fichte (ausgewachsen)', bucket: 'baum', why: 'Eine ausgewachsene Fichte ist ein hoher Baum der Baumschicht.' }
         ]
       },
       {
@@ -125,7 +129,7 @@
           { id: 't4', label: 'Rötelmaus', bucket: 'moos', why: 'Die Rötelmaus lebt in der Moosschicht.' },
           { id: 't5', label: 'Schmetterling an Waldblumen', bucket: 'kraut', why: 'Die Krautschicht ist eine Nahrungsquelle für zahlreiche Insekten.' },
           { id: 't6', label: 'Haselmaus', bucket: 'strauch', why: 'Die Haselmaus frisst Blüten und Früchte der Sträucher.' },
-          { id: 't7', label: 'Reh', bucket: 'strauch', why: 'Laut Infografik sind Blätter, Blüten und Früchte der Sträucher wichtige Nahrung für Rehe.' },
+          { id: 't7', label: 'Reh', bucket: ['strauch', 'kraut'], why: 'Das Reh frisst Blätter, Knospen und Früchte von Sträuchern und Kräutern. Laut Infografik ist die Strauchschicht eine wichtige Nahrungsquelle für Rehe.' },
           { id: 't8', label: 'Eichhörnchen', bucket: 'baum', why: 'Das Eichhörnchen lebt in den Baumkronen.' },
           { id: 't9', label: 'Buntspecht', bucket: 'baum', why: 'Der Buntspecht hämmert an Baumstämmen und lebt in der Baumschicht.' }
         ]
@@ -138,18 +142,37 @@
           { kind: 'single', q: 'Welches Stockwerk entspricht im Haus-Vergleich dem Keller?', options: ['Moosschicht', 'Wurzelschicht', 'Krautschicht', 'Strauchschicht'], answer: 1, why: 'Die Wurzelschicht liegt unter der Erde, wie ein Keller.' },
           { kind: 'single', q: 'Was bestimmt vor allem, wie viel Licht in die unteren Schichten fällt?', options: ['Die Dichte des Kronendachs', 'Die Zahl der Regenwürmer', 'Die Höhe der Moose', 'Die Farbe der Pilze'], answer: 0, why: 'Je dichter das Kronendach der Baumschicht, desto weniger Licht kommt unten an.' },
           { kind: 'tf', q: 'Die Strauchschicht bietet vor allem Vögeln einen sicheren Nistplatz.', answer: true, why: 'Richtig: Das dichte Geflecht aus Ästen und Zweigen schützt die Nester.' },
-          { kind: 'tf', q: 'In der Wurzelschicht leben keine Tiere, weil es dort dunkel ist.', answer: false, why: 'Falsch: Dort leben viele Zersetzer, zum Beispiel Regenwürmer, Tausendfüßer, Pilze und Bakterien.' }
+          { kind: 'tf', q: 'In der Wurzelschicht leben keine Tiere, weil es dort dunkel ist.', answer: false, why: 'Dort leben viele Tiere wie Regenwürmer und Tausendfüßer, außerdem Pilze und Bakterien. Sie alle zersetzen tote Reste.' }
         ]
       }
     ],
     explain: [
       {
+        id: 'sw-e0', op: 'Zeichne', papier: true,
+        task: 'Zeichne ein Schema der fünf Stockwerke des Waldes und beschrifte es: Name der Schicht, Höhe, je eine typische Pflanze und ein typisches Tier.',
+        model: 'So könnte dein Schema aussehen (von oben nach unten gelesen):' +
+          '<table class="schema"><tr><th>Schicht</th><th>Höhe</th><th>Pflanze</th><th>Tier</th></tr>' +
+          '<tr><td>Baumschicht</td><td>bis 40 m</td><td>Buche, Fichte</td><td>Eichhörnchen, Buntspecht</td></tr>' +
+          '<tr><td>Strauchschicht</td><td>bis 5 m</td><td>Hasel, Holunder</td><td>Haselmaus, nistende Vögel</td></tr>' +
+          '<tr><td>Krautschicht</td><td>bis 1,5 m</td><td>Bärlauch, Farn</td><td>Insekten, z. B. Schmetterlinge</td></tr>' +
+          '<tr><td>Moosschicht</td><td>bis 20 cm</td><td>Moose, Pilze</td><td>Waldeidechse, Rötelmaus</td></tr>' +
+          '<tr class="schema__boden"><td>Wurzelschicht</td><td>im Boden</td><td>Wurzeln</td><td>Regenwurm, Tausendfüßer</td></tr></table>' +
+          'Wichtig: Zeichne eine deutliche Linie für den Erdboden. Die Wurzelschicht liegt darunter.',
+        points: [
+          'Die fünf Schichten liegen in der richtigen Reihenfolge übereinander.',
+          'Die Wurzelschicht liegt unter der Bodenlinie.',
+          'Die Höhen stimmen: 20 cm, 1,5 m, 5 m, 40 m.',
+          'Zu jeder Schicht steht mindestens eine Pflanze und ein Tier.'
+        ],
+        starter: ['Zeichne zuerst eine waagerechte Linie für den Erdboden.', 'Darunter kommt die Wurzelschicht.', 'Darüber stapelst du die anderen Schichten wie Stockwerke.']
+      },
+      {
         id: 'sw-e1', op: 'Erkläre',
         task: 'Erkläre, warum ein Baum im Laufe seines Lebens allen Schichten des Waldes angehört.',
-        model: 'Ein Baum wächst von ganz klein nach ganz groß. Als Keimling ist er nur wenige Zentimeter hoch und gehört zur <b>Moosschicht</b>. Als junges Bäumchen wächst er in der <b>Krautschicht</b> (bis 1,5 m), danach in der <b>Strauchschicht</b> (bis 5 m). Erst wenn er ausgewachsen ist, reicht seine Krone in die <b>Baumschicht</b>. Seine Wurzeln stecken die ganze Zeit in der <b>Wurzelschicht</b>.',
+        model: 'Ein Baum wächst von ganz klein nach ganz groß. Aus dem Samen wächst ein winziger Keimling zwischen den Moosen, er gehört zur <b>Moosschicht</b>. Als junges Bäumchen wächst er in der <b>Krautschicht</b> (bis 1,5 m), die Infografik nennt dort „aufkeimende Bäume“. Danach gehört er zur <b>Strauchschicht</b> (bis 5 m). Erst wenn er ausgewachsen ist, reicht seine Krone in die <b>Baumschicht</b>. Seine Wurzeln stecken die ganze Zeit in der <b>Wurzelschicht</b>.',
         points: [
           'Der Baum wächst im Laufe seines Lebens von klein nach groß.',
-          'Als Keimling gehört er zur Moosschicht, als junges Bäumchen zur Krautschicht.',
+          'Als winziger Keimling gehört er zur Moosschicht, als junges Bäumchen zur Krautschicht.',
           'Später gehört er zur Strauchschicht, ausgewachsen zur Baumschicht.',
           'Seine Wurzeln liegen immer in der Wurzelschicht.'
         ],
@@ -184,7 +207,9 @@
       'Der Wald hat fünf Stockwerke: <b>Wurzel-, Moos-, Kraut-, Strauch- und Baumschicht</b>. Eselsbrücke: <i>Wilde Mäuse kauen süße Beeren.</i>',
       'Höhen: Moosschicht bis 20 cm, Krautschicht bis 1,5 m, Strauchschicht bis 5 m, Baumschicht bis 40 m.',
       'Wurzelschicht: Wurzeln und Zersetzer (Bakterien, Pilze, Regenwürmer, Tausendfüßer). Moosschicht: Moose, Pilze, niedrige Blütenpflanzen; Waldeidechse, Rötelmaus. Krautschicht: Bärlauch, Waldmeister, Farne; viele Insekten. Strauchschicht: Holunder, Hasel, Weißdorn; Vögel, Reh, Haselmaus. Baumschicht: Baumkronen; Vögel, Eichhörnchen, Insekten.',
-      'Das Kronendach bestimmt, wie viel Licht in die unteren Schichten fällt.'
+      'Das Kronendach bestimmt, wie viel Licht in die unteren Schichten fällt.',
+      'Ein Baum gehört im Laufe seines Lebens allen Schichten an: winziger Keimling (Moosschicht), junges Bäumchen (Krautschicht), Strauchschicht, ausgewachsen Baumschicht; die Wurzeln immer in der Wurzelschicht.',
+      '<b>Ökosystem</b> = Lebensraum + Lebensgemeinschaft (alle Lebewesen, die dort zusammenleben).'
     ]
   });
 })();
